@@ -3,3 +3,9 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+# Fourmidable specific
+error.log
+# NOTE these two are generated wehn running and have been checked in on other places, I dont knwo why
+#lextab.py
+#yacctab.py

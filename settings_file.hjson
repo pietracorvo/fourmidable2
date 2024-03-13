@@ -37,34 +37,34 @@
 				"ports": {
 					"AI": [
 						# hallprobe
-						"Dev1/ai21",
-			            "Dev1/ai20",
-			            "Dev1/ai19",
-			            # bighall fields
+						"Dev1/ai0",
+			            "Dev1/ai2",
 			            "Dev1/ai4",
-			            "Dev1/ai5",
-			            "Dev1/ai6",
-			            # bighall temp
-			            "Dev1/ai7",
-		            	# reference
-			            "Dev1/ai23",
-			            # temperature
-			            "Dev1/ai17",
+			            # bighall fields
 			            "Dev1/ai16",
+			            "Dev1/ai17",
 			            "Dev1/ai18",
-						# clock
-						"Dev1/ai22"
+			            # bighall temp
+			            "Dev1/ai19",
+		            	# reference   # TODO seems not to be needed
+			            //"Dev1/ai23",
+			            # temperature
+			            "Dev1/ai1",
+			            "Dev1/ai3",
+			            "Dev1/ai5"
+						# clock    # TODO seems not to be needed, when having this uncommented, hallprobeA has ~2.5 offset ???
+						//"Dev1/ai30"
 
 					],
 					"AO": [
-						# reference
+						# reference   # TODO seems to be needed
 			            "Dev1/ao2"
 						# hexapole
 						"Dev2/ao0",
 						"Dev2/ao2",
-						"Dev2/ao4",
-						# clock
-						"Dev2/ao11"
+						"Dev2/ao4"
+						# clock   # TODO seems not to be needed
+						//"Dev2/ao11"
 					]
 				}
 			}
@@ -76,9 +76,9 @@
 			"port_type": "AI",
 			"controller": "NIcard1",
 			"ports": {
-				"Dev1/ai21": "hallprobe_A",
-	            "Dev1/ai20": "hallprobe_B",
-	            "Dev1/ai19": "hallprobe_C"
+				"Dev1/ai0": "hallprobe_A",
+	            "Dev1/ai2": "hallprobe_B",
+	            "Dev1/ai4": "hallprobe_C"
 			},
 			"calibration": {
 				"type": "InstrumentCalibration"
@@ -97,6 +97,7 @@
 				"type": "InstrumentCalibration"
 			}
 		},
+		# TODO needed on AO to apply field, check what it is
 		"reference":{
 			"type": "NIinst",
 			"port_type": "AO",

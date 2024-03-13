@@ -1,0 +1,11 @@
+--------------------------------------------------------------------------------
+2022-12-19, 14:13:39
+--------------------------------------------------------------------------------
+<class 'KeyError'>: 
+'stage'
+--------------------------------------------------------------------------------
+  File "C:\Users\3Dstation3\PycharmProjects\pythonProject\gui\widgets\skm_window.py", line 341, in <module>
+    aw = SkmWidget(moke)
+  File "C:\Users\3Dstation3\PycharmProjects\pythonProject\gui\widgets\skm_window.py", line 18, in __init__
+    self.stage = moke.instruments['stage']
+0.0.1

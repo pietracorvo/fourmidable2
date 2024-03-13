@@ -1,0 +1,20 @@
+# 1) first things I have installed
+hjson
+h5py
+PyQt5
+pyqtgraph
+instrumental-lib==0.6
+# NOTE files in instrumental-lib have been changed manually
+
+# 2) packages installed to run conrol.controllers.Moke
+pyusb
+psutil
+pandas
+nicelib
+numba
+termcolor
+pyopengl
+trimesh
+matpltolib
+requests
+scikit-learn

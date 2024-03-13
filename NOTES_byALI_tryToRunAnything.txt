@@ -1,0 +1,71 @@
+# THINGS I HAVE DONE STARTING FROM SCRATCH (2024-03-12)
+
+
+Just to run anything I had to do the following:
+
+    1. installed packages only needed to run Moke instance (see requirements_byAli.txt)
+
+    2. changes in .venv\lib\site-packages\instrumental\drivers\facet.py
+
+        from collections import Mapping, namedtuple
+            to
+        from collections import namedtuple
+        from collections.abc import Mapping
+		
+	3. 	comment all irrelevant imports in control/controllers/__init__.py
+		comment switch_laser in  control/instruments/moke.py
+		comment samarct in experiments/skm.py
+
+    4. now I get the "Duplicate channel name ao2" Exception, change
+        instrumental-lib\drivers\daq\ni.py to modified version
+
+    5. Now I am stuck on the missing RTSI cable Error
+
+        instrumental.drivers.daq.ni.DAQError: (-89125) No registered trigger lines could be found between the dev
+        ices in the route.
+        If you have a PXI chassis, identify the chassis correctly in MAX, and make sure it has been configured pr
+        operly. If you are using PCI devices, make sure they are connected with a RTSI cable and that the RTSI ca
+        ble is registered in MAX. Otherwise, make sure there is an available trigger line on the trigger bus shar
+        ed between the devices.
+        Source Device: Dev1
+        Destination Device: Dev2
+
+        Task Name: _unnamedTask<1>
+
+        Status Code: -89125
+
+        -> resolved bz connecting the NIcards on the RTSI bus and register the connection in NI Max
+
+
+
+
+
+
+
+
+
+
+################################################################
+The following is for using the NIcard instead of the NIcardRTSI.
+In addition t9o the above I also had to doi the following:
+
+    1. !!! NIcard SPECIFIC
+		had to adapt places in control/controllers/ni.py
+        'TEST 1'
+        'TEST 2'
+        'TEST 3'
+        because only ao&ai ports were used without Dev1/2 in front
+
+    2. !!! NIcard SPECIFIC
+		in .venv\lib\site-packages\instrumental\drivers\daq\ni.py (modified version)
+        channels are referenced sometimes with DevX/aXX and sometimes with aXX
+        I chnaged them to aXX on two locations in the code ('TEST 4', 'TEST 5')
+
+
+CONCLUSION:
+	When using ni.py instead of ni_rtsi.py instrumental-lib and controllers/ni.py are often confused with the
+	port names (using DevX/ in front of port or not).
+	When using ni_rtsi.py the naming conventions work with any fixes in the code (except using the modified instrumental-lib\drivers\daq\ni.py).
+	So I would assume that ni.py has been used in the beginning, then development has been continued with ni_rtsi.py
+	and now the code is not really working with ni.py.
+	After all also ni.py seems to need the RTSI connection !!!

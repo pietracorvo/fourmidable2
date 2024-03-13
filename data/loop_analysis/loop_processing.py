@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[2]:
+
+
+import h5py
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns; sns.set()
+import pandas as pd
+import os
+import importlib
+import loop_analysis
+importlib.reload(loop_analysis)
+from loop_analysis import *
+
+
+# In[3]:
+
+
+file_path = r"C:\Users\3Dstation3\Documents\3DMOKE\LoopTaking_20220907-171727.h5"
+
+# ### Get the data and process the loop
+
+# #### Get the keys from the file
+
+# In[4]:
+
+
+with h5py.File(file_path, 'r') as file:
+    print(list(file.keys()))
+
+
+# In[5]:
+
+
+raw_data = get_file_data(file_path, group='loops')
+
+averaged_data = get_averaged_loop(raw_data)
+plot_fields(averaged_data)
+data_kerr = get_kerr_signal(averaged_data.copy(), plot=True, cutoff=0.2)
+plt.figure()
+plot_moke(data_kerr)
+
+
+# ### Get the derivative and find the switching points
+
+# In[6]:
+
+
+data_shifted = fft_shift(data_kerr)
+plot_fields(data_shifted)
+plt.title('Fields after shifting the data')
+data_deriv, peaks = get_derivative(data_shifted)
+plot_derivatives(data_deriv, peaks);
+
+
+# In[ ]:
+
+
+
+

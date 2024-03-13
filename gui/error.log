@@ -1,0 +1,11 @@
+--------------------------------------------------------------------------------
+2019-03-12, 13:41:52
+--------------------------------------------------------------------------------
+<class 'KeyError'>: 
+'stage'
+--------------------------------------------------------------------------------
+  File "C:/Users/user/Documents/Python/MOKEpy/gui/moke_gui.py", line 186, in <module>
+    aw = ApplicationWindow(moke)
+  File "C:/Users/user/Documents/Python/MOKEpy/gui/moke_gui.py", line 102, in __init__
+    movement_control = mywidgets.movement.MovementControl(self.moke.instruments["stage"])
+0.0.1

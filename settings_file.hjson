@@ -1,0 +1,116 @@
+{
+	/* 
+	loop tuning parameters get passed straight to the main moke instrument and 
+	are used in the magnet loop tuning experiment for PID loop tuning. 
+	So far, I found that just P correction is better for the type of tuning that we are doing
+	*/
+	"loop_tuning":{
+		"Kp": 1.8,
+		// "Kp": 0.3,
+		// "Ki": 0.2,
+		// "Kd": 0.8
+	},
+	"controllers": [
+		{
+			"type": "NIcardRTSI",
+			"name": "NIcard1",
+			"parameters": {
+				/* The rate of the device.
+				This needs to be divisible by 5 due to the way timing is done
+				*/
+				"rate": 10000,
+				/* NI input buffer size in number of samples. 
+				This should be increased if the system can't keep up with the acquisition
+				*/
+				"input_buffer_size": 200000,
+				/* How often the data is read from the inputs. 
+				This should never be bigger than the clock master tick rate (0.1 by default)
+				*/
+				"data_acquisition_period": 0.05
+				/* How often are the outputs refreshed
+				*/
+				"output_refresh_time": 0.05
+				/*
+				The order of these entries determines the order the card reads the data. 
+				This is important for current leakages.
+				*/
+				"ports": {
+					"AI": [
+						# hallprobe
+						"Dev1/ai21",
+			            "Dev1/ai20",
+			            "Dev1/ai19",
+			            # bighall fields
+			            "Dev1/ai4",
+			            "Dev1/ai5",
+			            "Dev1/ai6",
+			            # bighall temp
+			            "Dev1/ai7",
+		            	# reference
+			            "Dev1/ai23",
+			            # temperature
+			            "Dev1/ai17",
+			            "Dev1/ai16",
+			            "Dev1/ai18",
+						# clock
+						"Dev1/ai22"
+
+					],
+					"AO": [
+						# reference
+			            "Dev1/ao2"
+						# hexapole
+						"Dev2/ao0",
+						"Dev2/ao2",
+						"Dev2/ao4",
+						# clock
+						"Dev2/ao11"
+					]
+				}
+			}
+		}
+	],
+	"instruments": {
+		"hallprobe":{
+			"type": "NIinst",
+			"port_type": "AI",
+			"controller": "NIcard1",
+			"ports": {
+				"Dev1/ai21": "hallprobe_A",
+	            "Dev1/ai20": "hallprobe_B",
+	            "Dev1/ai19": "hallprobe_C"
+			},
+			"calibration": {
+				"type": "InstrumentCalibration"
+			}
+		},
+		"hexapole": {
+			"type": "NIinst",
+			"port_type": "AO",
+			"controller": "NIcard1",
+			"ports": {
+	            "Dev2/ao0": "magnet_A",
+	            "Dev2/ao2": "magnet_B",
+	            "Dev2/ao4": "magnet_C"
+			},
+			"calibration": {
+				"type": "InstrumentCalibration"
+			}
+		},
+		"reference":{
+			"type": "NIinst",
+			"port_type": "AO",
+			"controller": "NIcard1",
+			"ports": {
+	            "Dev1/ao2": "reference"
+			},
+			"calibration": {
+				"type":"Reference",
+				"parameters": {
+					"offset": 2.45
+				}
+			}
+		}
+	}
+}
+

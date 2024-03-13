@@ -1,5 +1,8 @@
 import os
 import sys
+
+import numpy as np
+
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 BASE_FOLDER = os.path.join(DIR_PATH, '..')
 sys.path.append(os.path.join(DIR_PATH, '..'))
@@ -78,12 +81,12 @@ class ApplicationWindow(QMainWindow):
         self.available_docks = {key: False for key, value in self.moke.instruments.items(
         ) if isinstance(value, NIinst)}
         self.available_docks.update({
-            "wollaston1_composite": True,
-            "wollaston2_composite": False,
-            "wollaston1_fft": False,
-            "wollaston2_fft": False,
-            "camera1": True,
-            "camera2": True,
+            #"wollaston1_composite": True,
+            #"wollaston2_composite": False,
+            #"wollaston1_fft": False,
+            #"wollaston2_fft": False,
+            #"camera1": True,
+            #"camera2": True,
             "3D_fields": False,
             "console": False,
             "hallprobe": True,
@@ -165,19 +168,27 @@ class ApplicationWindow(QMainWindow):
         self.moke_docker.setMinimumSize(200, 200)
 
         # create movement control widget
-        stage = moke.instruments['stage']
-        instruments_to_control = [stage]
+        #stage = moke.instruments['stage']
+        #instruments_to_control = [stage]
+        class DummyStage:
+            def __init__(self):
+                self.direction_labels = ['a', 'b', 'c']
+            def get_position(self):
+                return [0.,0.,0.]
+        instruments_to_control = [DummyStage()]
         self.movement_control = movement.MovementControl(
             instruments_to_control)
         self.movement_control.setMinimumWidth(250)
         self.movement_control.setMaximumWidth(300)
 
         # add the laser control button
-        self.laser_button = laser_button.LaserButton(self.moke)
+        #self.laser_button = laser_button.LaserButton(self.moke)
 
         # create movement buttons widget
+        # self.move_buttons = move_buttons.MovementButtons(
+        #     self.moke.instruments["stage"])
         self.move_buttons = move_buttons.MovementButtons(
-            self.moke.instruments["stage"])
+            DummyStage())
         self.move_buttons.setMinimumWidth(200)
         self.move_buttons.setMaximumWidth(250)
 
@@ -188,7 +199,7 @@ class ApplicationWindow(QMainWindow):
         hlayout.addWidget(self.moke_docker)
 
         vlayout = QVBoxLayout()
-        vlayout.addWidget(self.laser_button)
+        #vlayout.addWidget(self.laser_button)
         vlayout.addWidget(self.movement_control)
         vlayout.addWidget(self.move_buttons)
 

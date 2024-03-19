@@ -1,0 +1,13 @@
+{
+  zero_angle: 0
+  rotation_axis_displacement:
+  [
+    1
+    2
+  ]
+  zero_position_displacement:
+  [
+    3
+    4
+  ]
+}

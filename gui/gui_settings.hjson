@@ -4,19 +4,8 @@
     hallprobe: true
     hexapole: true
     reference: false
-    laser: false
-    temperature: true
-    wollaston1: false
-    wollaston2: false
-    bighall_fields: true
-    bighall_temp: false
-    wollaston1_composite: false
-    wollaston2_composite: true
-    wollaston1_fft: false
-    wollaston2_fft: true
-    camera1: false
-    camera2: false
     3D_fields: false
     console: false
+    temperature: true
   }
 }

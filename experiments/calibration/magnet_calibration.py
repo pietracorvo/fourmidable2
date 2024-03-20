@@ -39,6 +39,10 @@ def loop_worker(mk, stop_event, cutoff_freq=100, n_loops=3, skip_loops=0, max_pe
         with h5py.File(filename, 'w') as f:
             i = 0
             while True:
+                # stop the experiment after some iterations
+                if i == 5:
+                    stop_event.set()
+
                 i += 1
                 print('Data ', i)
                 # create a random period (but well defined in rate)

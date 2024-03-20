@@ -18,3 +18,8 @@ trimesh
 matpltolib
 requests
 scikit-learn
+
+# just for convenience
+ipython
+jupyter
+

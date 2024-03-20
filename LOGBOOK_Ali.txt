@@ -1,13 +1,16 @@
-CURRENT TODOs CONCERNING FOURMIDABLE
+# CURRENT TODOs CONCERNING FOURMIDABLE
 
 
-
+2024-03-19:
+    - found documentation of 3DMoke
 
 2024-03-13:
     - Calibration: understanding how calibration of the hallprobes and magnets works, on what it relies, etc.
         -> look into experiments
     - Hallprobes: having clock Dev1/aiXX gives a ~2.5V offset (???)
     - Stage: replace smaract stage code with our stage
+        NOTE before the smaract stagethe Fourmidable PI stage was used, so probably there is still some code around from it
     - laser button currently commented
     - "reference" instrument on AO seems to be needed for deGauss, find out what it is and does
+    - incorporate quantalux gui
 

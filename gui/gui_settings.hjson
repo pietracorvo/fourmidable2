@@ -3,9 +3,10 @@
   {
     hallprobe: true
     hexapole: true
+    v_measurement: false
+    temperature: false
     reference: false
     3D_fields: false
     console: false
-    temperature: true
   }
 }

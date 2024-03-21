@@ -52,6 +52,8 @@
 			            "Dev1/ai1",
 			            "Dev1/ai3",
 			            "Dev1/ai5",
+			            # vmeasurement
+			            "Dev1/ai20",
 						# clock    # TODO seems not to be needed, when having this uncommented, hallprobeA has ~2.5 offset ???
 						//"Dev1/ai30"
 
@@ -96,6 +98,14 @@
 			"calibration": {
 				"type": "InstrumentCalibration"
 			}
+		},
+		"v_measurement": {
+		    "type": "NIinst",
+		    "port_type": "AI",
+		    "controller": "NIcard1",
+		    "ports": {
+	            "Dev1/ai20": "vmeasurement"
+			},
 		},
 		"temperature":{
 			"type": "NIinst",

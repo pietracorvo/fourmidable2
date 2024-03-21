@@ -95,7 +95,7 @@ def take_loop(moke, signal=None, period=1, n_loops=5,
             # save the stage location and camera images if they exist
             #for key in ['stage', 'camera1', 'camera2']:
                 #if key in moke.instruments:
-            moke.instruments['stage'].save(f)
+            #moke.instruments['stage'].save(f)
             grp = create_loops_group(f)
             grp.attrs['period'] = period
             grp.attrs['loops_per_data'] = n_periods

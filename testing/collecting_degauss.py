@@ -11,7 +11,7 @@ from gui.widgets.moke_docker import MokeDocker, start_application
 from control.calibration.calibrations import InstrumentCalibration
 from data import signal_generation
 
-from PyQt5.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 import threading
 import h5py
 import time

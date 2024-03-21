@@ -50,7 +50,7 @@ def get_minor_loops(moke, filename, period=10, step=1, stop_event=None):
                 if stop_event is not None and stop_event.is_set():
                     break
                 # check if the temperature is too hot. If so, immediately put the current to 0 and wait
-                temp_too_high_stop(mk)
+                #temp_too_high_stop(mk)
                 # when ready to continue, stage the base signal and wait 1 second to make sure you are back at it
                 magnet.stage_data(base_signal, 3)
                 time.sleep(1)
@@ -58,12 +58,12 @@ def get_minor_loops(moke, filename, period=10, step=1, stop_event=None):
                     break
                 # get the zero signal for all apart from the active pole
                 t = np.arange(0, period + 2, 1 / rate)
-                signal = np.zeros((rate * (period + 2), 3))
-                signal[:rate * period, pole] = -10 + amp / 2 * \
-                    (1 - np.cos(np.pi * 2 * t[:rate * period] / period)
+                signal = np.zeros((int(rate * (period + 2)), 3))
+                signal[:int(rate * period), pole] = -10 + amp / 2 * \
+                    (1 - np.cos(np.pi * 2 * t[:int(rate * period)] / period)
                      )  # this is the signal going up to the desired value and back
                 # stage 10s after it comes back so that there is no going back up while saving
-                signal[rate * period:, pole] = -10
+                signal[int(rate * period):, pole] = -10
 
                 # apply the signal
                 start_time = magnet.stage_interp(t, signal)
@@ -91,7 +91,8 @@ def get_minor_loops(moke, filename, period=10, step=1, stop_event=None):
 if __name__ == "__main__":
     from control.instruments.moke import Moke
     filename = 'hex_minor_Ichannel.h5'
-    period = 10
+    #period = 10
+    period = 1
     step = 1
 
     with Moke() as mk:

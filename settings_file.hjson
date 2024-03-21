@@ -51,7 +51,7 @@
 			            # temperature
 			            "Dev1/ai1",
 			            "Dev1/ai3",
-			            "Dev1/ai5"
+			            "Dev1/ai5",
 						# clock    # TODO seems not to be needed, when having this uncommented, hallprobeA has ~2.5 offset ???
 						//"Dev1/ai30"
 
@@ -96,6 +96,25 @@
 			"calibration": {
 				"type": "InstrumentCalibration"
 			}
+		},
+		"temperature":{
+			"type": "NIinst",
+			"port_type": "AI",
+			"controller": "NIcard1",
+			"ports": {
+	            "Dev1/ai1": "temperature_A",
+	            "Dev1/ai3": "temperature_B",
+	            "Dev1/ai5": "temperature_C"
+			},
+			# TODO this calibration is from 3DMoke
+			"calibration": {
+				"type": "TemperatureCalibration",
+				"parameters": {
+					"offset": 812,
+					"scale": 23
+				}
+			},
+			"subsample": 10
 		},
 		# TODO needed on AO to apply field, check what it is
 		"reference":{

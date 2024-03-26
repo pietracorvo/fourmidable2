@@ -1,8 +1,37 @@
 # CURRENT TODOs AND STUFF CONCERNING 3DMOKE CODE ON FOURMIDABLE
 
 
+
+2024-03-26:
+    - HallsensorC gives switched polarity compared to other sensors
+        other sensors give negative output voltage for positive current input to magnet (like in 3DMoke)
+    - applied magnet calibration successfully
+        BUT maybe Hallprobes needs to be calibrated first ???
+
+
+2024-03-25:
+    - to get a positive kepco output for positive kepco input signal (like in 3DMoke), the input cables polarity has been switched temporairly
+        -> for later: change polarity in NIcard output box and switch kepco input cables back
+
+
+2024-03-21:
+    - to generate the file for the MagnetHystCalib you have to run the following scripts and notebooks
+        1) testing\collecting_degauss.py
+            creates degauss_signal.h5 file
+        2) experiments\calibration\magnetic_minor_loop.py
+            creates hex_minor_Ichannel.h5 with fits of loops
+        3) experiments\calibration\RL_circuit_testing.py for every pole
+            (NOTE connect cable in paralell to kepco output to measure voltage as instrument "v_measurement" )
+            creates rl_response_data_poleX.h5
+            3.1) magnet_calibration_insteps\getting_rl_fft.ipynb
+                creates rl_coeff.p from rl_response_data_poleX.h5
+        4) now run magnet_calibration_insteps\inverse_hyst_fitting.ipynb to process and join the files from 1)-3)
+            creates
+
+
 2024-03-19:
     - found documentation of 3DMoke
+
 
 2024-03-13:
     - Calibration: understanding how calibration of the hallprobes and magnets works, on what it relies, etc.

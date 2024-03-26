@@ -91,7 +91,8 @@ class ApplicationWindow(QMainWindow):
             "console": False,
             "hallprobe": True,
             "temperature": False,
-            "hexapole": True
+            "hexapole": True,
+            #"v_measurement": True
         })
         # try loading docks setup from the settings, fall back to default it it fails
         try:

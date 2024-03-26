@@ -4,7 +4,7 @@
     hallprobe: true
     hexapole: true
     v_measurement: false
-    temperature: false
+    temperature: true
     reference: false
     3D_fields: false
     console: false

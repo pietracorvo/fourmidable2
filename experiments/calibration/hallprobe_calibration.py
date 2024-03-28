@@ -45,7 +45,7 @@ def calibrate_hallprobe(moke, period=5, cutoff_freq=5, plot=False):
     hp = moke.instruments['hallprobe']
     bighp = moke.instruments['bighall_fields']
     magnet = moke.instruments['hexapole']
-    stage = moke.instruments['stage']
+    #stage = moke.instruments['stage']
     # make sure the calibration is default
     # set the flushing time to be appropriate
     magnet.flushing_time = np.max([period + 1, 10])
@@ -72,7 +72,7 @@ def calibrate_hallprobe(moke, period=5, cutoff_freq=5, plot=False):
         hp.save(file, start_time=start_time, end_time=end_time,
                 wait=True)
         bighp.save(file, start_time=start_time, end_time=end_time, wait=True)
-        stage.save(file)
+        #stage.save(file)
     print('Data acquired')
     zero_magnet(moke)
 

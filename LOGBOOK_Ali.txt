@@ -2,11 +2,15 @@
 
 
 
+2024-03-28:
+    - not HallprobeC is wrong cabled, but current trough PoleC runs in wrong handedness
+    - applied magnet calibration successfully (with switched kepco C output cable)
+    - first tests with senis, confirmed FoR, verified wrong current handedness in poleC
+
 2024-03-26:
     - HallsensorC gives switched polarity compared to other sensors
         other sensors give negative output voltage for positive current input to magnet (like in 3DMoke)
     - applied magnet calibration successfully
-        BUT maybe Hallprobes needs to be calibrated first ???
 
 
 2024-03-25:

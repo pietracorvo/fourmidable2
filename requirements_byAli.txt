@@ -6,7 +6,7 @@ pyqtgraph
 instrumental-lib==0.6
 # NOTE files in instrumental-lib have been changed manually
 
-# 2) packages installed to run conrol.controllers.Moke
+# 2) packages installed to run control.controllers.Moke
 pyusb
 psutil
 pandas
@@ -19,7 +19,7 @@ matpltolib
 requests
 scikit-learn
 
-# just for convenience
+# 3) just for convenience
 ipython
 jupyter
 

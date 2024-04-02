@@ -21,15 +21,15 @@ def get_hallprobe_calibration(filename, plot=False):
         t -= t[0]
         hp = file.get('/hallprobe/data')[:, 1:]
         bighp = file.get('/bighall_fields/data')[:, 1:]
-        position = file.get('/stage/data')[:]
+        #position = file.get('/stage/data')[:]
 
-    angle = position[3]
-    R = get_rot_matrix(angle)
-    bighp = bighp.dot(R)
+    # TODO just for the moment, assume angle during calibration as 0
+    #angle = position[3]
+    #R = get_rot_matrix(angle)
+    #bighp = bighp.dot(R)
 
     # do the linear regression on the two sets of data
-    regr = linear_model.LinearRegression(
-        fit_intercept=False, normalize=False)
+    regr = linear_model.LinearRegression(fit_intercept=False)
 
     regr.fit(hp, bighp)
     r = regr.score(hp, bighp)

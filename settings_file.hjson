@@ -56,7 +56,6 @@
 			            "Dev1/ai20",
 						# clock    # TODO seems not to be needed, when having this uncommented, hallprobeA has ~2.5 offset ???
 						//"Dev1/ai30"
-
 					],
 					"AO": [
 						# reference   # TODO seems to be needed
@@ -82,6 +81,7 @@
 	            "Dev1/ai2": "hallprobe_B",
 	            "Dev1/ai4": "hallprobe_C"
 			},
+            # TODO Used during calibration, remove later
 			"calibration": {
 				"type": "InstrumentCalibration"
 			}
@@ -95,6 +95,7 @@
 	            "Dev2/ao2": "magnet_B",
 	            "Dev2/ao4": "magnet_C"
 			},
+			# TODO Used during calibration, remove later
 			"calibration": {
 				"type": "InstrumentCalibration"
 			}
@@ -111,14 +112,13 @@
 			"calibration": {
 				"type": "NIoffsetScale",
 				"parameters": {
-					# TODO check if this calibration is legit
 					# volts to mT
 					'scale': [[-20, 0, 0], [0, 0, 20], [0, 20, 0]],
 					'offset': [0, 0, 0]
 				}
 			}
 		},
-		# only needed for experiments\calibration\RL_circuit_testing.py
+		# NOTE only needed for experiments\calibration\RL_circuit_testing.py
 		"v_measurement": {
 		    "type": "NIinst",
 		    "port_type": "AI",
@@ -136,7 +136,7 @@
 	            "Dev1/ai3": "temperature_B",
 	            "Dev1/ai5": "temperature_C"
 			},
-			# TODO this calibration is from 3DMoke
+			# TODO this calibration is still from 3DMoke
 			"calibration": {
 				"type": "TemperatureCalibration",
 				"parameters": {

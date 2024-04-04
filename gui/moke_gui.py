@@ -169,14 +169,8 @@ class ApplicationWindow(QMainWindow):
         self.moke_docker.setMinimumSize(200, 200)
 
         # create movement control widget
-        #stage = moke.instruments['stage']
-        #instruments_to_control = [stage]
-        class DummyStage:
-            def __init__(self):
-                self.direction_labels = ['a', 'b', 'c']
-            def get_position(self):
-                return [0.,0.,0.]
-        instruments_to_control = [DummyStage()]
+        stage = moke.instruments['stage']
+        instruments_to_control = [stage]
         self.movement_control = movement.MovementControl(
             instruments_to_control)
         self.movement_control.setMinimumWidth(250)
@@ -186,10 +180,8 @@ class ApplicationWindow(QMainWindow):
         #self.laser_button = laser_button.LaserButton(self.moke)
 
         # create movement buttons widget
-        # self.move_buttons = move_buttons.MovementButtons(
-        #     self.moke.instruments["stage"])
         self.move_buttons = move_buttons.MovementButtons(
-            DummyStage())
+            self.moke.instruments["stage"])
         self.move_buttons.setMinimumWidth(200)
         self.move_buttons.setMaximumWidth(250)
 

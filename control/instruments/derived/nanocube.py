@@ -13,6 +13,9 @@ class NanoCube(NIinst):
         NIinst.__init__(self, *args, **kwargs)
         self.sliding_thread = threading.Thread()
 
+        # TODO currently hardcoded, possibly move to settingsfile
+        self.direction_labels = ['x', 'y', 'z']
+
     def is_in_range(self, position):
         data = pd.DataFrame([position])
         return self.calibration.is_in_range(data)
@@ -26,11 +29,15 @@ class NanoCube(NIinst):
         # gets the last sample read
         self.data_lock.acquire(True)
         try:
-            pos = copy.deepcopy(self.data_stream[-1].iloc[-1:])
+            print('------------->', self.data_stream)
+            pos = copy.deepcopy(self.data_stream[-1][-1:])
+            print('------------->', pos)
         except IndexError:
+            print('in IndexError')
             # if nothing in the data stream, means that you are at 0, 0, 0
             pos = pd.DataFrame(np.zeros((1, 3)), columns=self.ports.values())
         self.data_lock.release()
+        print(self.calibration.inst2data(pos))
         return np.array(self.calibration.inst2data(pos))[0, :]
 
     def slide_to_position(self, position):

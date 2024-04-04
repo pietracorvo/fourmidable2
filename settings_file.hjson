@@ -63,7 +63,11 @@
 						# hexapole
 						"Dev2/ao0",
 						"Dev2/ao2",
-						"Dev2/ao4"
+						"Dev2/ao4",
+						# NanoCube stage
+						"Dev2/ao11",
+						"Dev2/ao12",
+						"Dev2/ao14"
 						# clock   # TODO seems not to be needed
 						//"Dev2/ao11"
 					]
@@ -135,6 +139,18 @@
 					'offset': [0, 0, 0]
 				}
 			}
+		},
+		# TODO check if calibration is needed like in 3DMoke
+		"stage":{
+			"type": "NanoCube",
+			"port_type": "AO",
+			"controller": "NIcard1",
+            "ports": {
+                "Dev2/ao11": "stage_x",
+                "Dev2/ao12": "stage_y",
+                "Dev2/ao14": "stage_z"
+            }
+            # TODO currently axes labels hard coded in NanoCube class
 		},
 		# NOTE only needed for experiments\calibration\RL_circuit_testing.py
 		"v_measurement": {

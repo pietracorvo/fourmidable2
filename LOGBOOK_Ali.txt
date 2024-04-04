@@ -8,6 +8,12 @@ OPEN TODOs:
 
 
 
+2024-04-02:
+    - rewired hexapole consistently, redone magent calibration
+
+2024-04-02:
+    - leaving the calibration for the senis as is (xyz -> -xzy)
+      adding a -135deg rotation in calibration class to move to table FOR
 
 2024-04-02:
     - start to change code for hallprobe calibration

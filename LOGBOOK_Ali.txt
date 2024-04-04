@@ -2,14 +2,16 @@
 
 
 OPEN TODOs:
-- understand the PID
+- redo hallprobe calibration
 - integrate nanocube stage
 - integrate quantalux
+- understand the PID
 
 
 
 2024-04-02:
     - rewired hexapole consistently, redone magent calibration
+    - cleanup magnet calibration, moved data, results and plots to data/results_magnet_calibration
 
 2024-04-02:
     - leaving the calibration for the senis as is (xyz -> -xzy)

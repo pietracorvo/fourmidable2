@@ -110,7 +110,7 @@
 				"type": "MagnetHystCalib",
 				"parameters": {
 					# file where the fitting parameters are stored
-					"file_path": "C:\\Users\\3DStation4\\PycharmProjects\\pythonProject_3DMOKE_new\\data\\magnet_response_parameters_hyst.p",
+					"file_path": "C:\\Users\\3DStation4\\PycharmProjects\\pythonProject_3DMOKE_new\\data\\results_magnet_calibration\\magnet_response_parameters_hyst.p",
 					# kepco mode, can be current or voltage
 					"kepco_mode" : "current"
 				}
@@ -130,6 +130,7 @@
 				"type": "NIoffsetScale",
 				"parameters": {
 					# volts to mT
+					# TODO redo hallprobe calibration
 					'scale': [[-20, 0, 0], [0, 0, 20], [0, 20, 0]],   # flip hall FOR xyz->-xzy like table FOR
 					'offset': [0, 0, 0]
 				}

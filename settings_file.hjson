@@ -106,11 +106,6 @@
 	            "Dev2/ao2": "magnet_B",
 	            "Dev2/ao4": "magnet_C"
 			},
-			# TODO Used during calibration, remove later
-			"calibration": {
-				"type": "InstrumentCalibration"
-			}
-            /*
 			"calibration": {
 				"type": "MagnetHystCalib",
 				"parameters": {
@@ -120,7 +115,7 @@
 					"kepco_mode" : "current"
 				}
 				"subinstruments": "hallprobe" # needs a hallprobe for a subinstrument to adjust for its calibration!
-			} */
+			}
 		},
 		"bighall_fields":{
 			"type": "NIinst",

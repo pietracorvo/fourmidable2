@@ -85,6 +85,17 @@
 			"calibration": {
 				"type": "InstrumentCalibration"
 			}
+			# TODO redo this calibration after realigning hexapole
+			/*
+			"calibration": {
+				"type": "HPSampleCalib",
+				"parameters": {
+					# volts in HPs to mT in table reference frame
+					"scale": [[-12.62722834179679, -15.555882861824347, -10.48532443798037], [-3.345805384352364, -4.429711419991506, -8.20835251552945], [9.569756107868283, 12.120959279298425, 5.001290606919113]],
+                    # angle between the senis FOR (already rotated by its calibration) and table FOR
+					"angle_senis2table": 0
+				}
+			} */
 		},
 		"hexapole": {
 			"type": "NIinst",
@@ -99,6 +110,17 @@
 			"calibration": {
 				"type": "InstrumentCalibration"
 			}
+            /*
+			"calibration": {
+				"type": "MagnetHystCalib",
+				"parameters": {
+					# file where the fitting parameters are stored
+					"file_path": "C:\\Users\\3DStation4\\PycharmProjects\\pythonProject_3DMOKE_new\\data\\magnet_response_parameters_hyst.p",
+					# kepco mode, can be current or voltage
+					"kepco_mode" : "current"
+				}
+				"subinstruments": "hallprobe" # needs a hallprobe for a subinstrument to adjust for its calibration!
+			} */
 		},
 		"bighall_fields":{
 			"type": "NIinst",
@@ -113,7 +135,7 @@
 				"type": "NIoffsetScale",
 				"parameters": {
 					# volts to mT
-					'scale': [[-20, 0, 0], [0, 0, 20], [0, 20, 0]],
+					'scale': [[-20, 0, 0], [0, 0, 20], [0, 20, 0]],   # flip hall FOR xyz->-xzy like table FOR
 					'offset': [0, 0, 0]
 				}
 			}
@@ -127,6 +149,7 @@
 	            "Dev1/ai20": "vmeasurement"
 			},
 		},
+		# TODO hallprobe temperature gives strange values, replace with new temperature sensors
 		"temperature":{
 			"type": "NIinst",
 			"port_type": "AI",

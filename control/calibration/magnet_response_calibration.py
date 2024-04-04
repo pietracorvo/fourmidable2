@@ -64,10 +64,10 @@ def reconstruct_hyst_signal(signal, L_start, F_fun):
     """Adjust for the hysteresis of the signal given the starting Preisach line
     and the integral F functions of the Preisach model"""
     # define the starting line
-    L = np.array(L_start.copy()).astype(np.float)
+    L = np.array(L_start.copy()).astype(float)
     signal_out = np.zeros(len(signal))
     for i, x in enumerate(signal):
-        L = update_hyst_line(L.copy(), np.float(x))
+        L = update_hyst_line(L.copy(), float(x))
         signal_out[i] = get_hystline_signal(L, F_fun)
     return signal_out, L
 
@@ -139,7 +139,7 @@ class MagnetHystCalib(InstrumentCalibration):
 
         # to speed up, filter the high frequency stuff
         # (need to add minus because of how the calibration was done)
-        t, signal = filter_signal(t0, -pole_signal)
+        t, signal = filter_signal(t0, pole_signal)
         n = signal.size
         timestep = t[1] - t[0]
         timestep0 = t0[1] - t0[0]

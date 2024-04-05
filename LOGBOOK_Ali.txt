@@ -1,7 +1,14 @@
 # CURRENT TODOs AND STUFF CONCERNING 3DMOKE CODE ON FOURMIDABLE
+================================================================
+
+NOTE I always mark cleanup, todos, questions in the code with the easily searchable sequence "# TODO"
 
 
+=========================
 OPEN TODOs:
+- CLEANUP hallprobe calibration
+- CLEANUP NanoCube calibration
+- CLEANUP NanoCube class
 - redo hallprobe calibration
 - integrate nanocube stage
 - integrate quantalux
@@ -9,7 +16,16 @@ OPEN TODOs:
 
 
 
-2024-04-02:
+=========================
+LOG:
+
+2024-04-05:
+    - started to integrate NanoCube
+        NOTE it already has a calibration NanoCubeCalib, which seems to use a subinstrument pi_rotator
+            which is also referenced in StageSampleRefCalib (seems to be connected to eucentric protocol ???)
+            I will remove it in NanoCubeCalib and leave it in StageSampleRefCalib for the moment
+
+2024-04-04:
     - rewired hexapole consistently, redone magent calibration
     - cleanup magnet calibration, moved data, results and plots to data/results_magnet_calibration
 
@@ -30,11 +46,9 @@ OPEN TODOs:
         other sensors give negative output voltage for positive current input to magnet (like in 3DMoke)
     - applied magnet calibration successfully
 
-
 2024-03-25:
     - to get a positive kepco output for positive kepco input signal (like in 3DMoke), the input cables polarity has been switched temporairly
         -> for later: change polarity in NIcard output box and switch kepco input cables back
-
 
 2024-03-21:
     - to generate the file for the MagnetHystCalib you have to run the following scripts and notebooks
@@ -50,10 +64,8 @@ OPEN TODOs:
         4) now run magnet_calibration_insteps\inverse_hyst_fitting.ipynb to process and join the files from 1)-3)
             creates
 
-
 2024-03-19:
     - found documentation of 3DMoke
-
 
 2024-03-13:
     - Calibration: understanding how calibration of the hallprobes and magnets works, on what it relies, etc.

@@ -149,6 +149,17 @@
                 "Dev2/ao11": "stage_x",
                 "Dev2/ao12": "stage_y",
                 "Dev2/ao14": "stage_z"
+            },
+            /*
+            "calibration": {
+                "type": "InstrumentCalibration"
+            } */
+            "calibration": {
+                "type": "NanoCubeCalib",
+                "parameters": {
+                    'scale': 1,
+                    'offset': 0
+                }
             }
             # TODO currently axes labels hard coded in NanoCube class
 		},

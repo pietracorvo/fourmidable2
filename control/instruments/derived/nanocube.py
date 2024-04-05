@@ -29,22 +29,24 @@ class NanoCube(NIinst):
         # gets the last sample read
         self.data_lock.acquire(True)
         try:
-            print('------------->', self.data_stream)
-            pos = copy.deepcopy(self.data_stream[-1][-1:])
-            print('------------->', pos)
+            #print('------------->', self.data_stream)
+            # pos = copy.deepcopy(self.data_stream[-1][-1:])   # TODO from Luka, dont know why he does it like this
+            pos = copy.deepcopy(self.data_stream[-1][1:])
+            #print('------------->', pos)
         except IndexError:
-            print('in IndexError')
             # if nothing in the data stream, means that you are at 0, 0, 0
             pos = pd.DataFrame(np.zeros((1, 3)), columns=self.ports.values())
         self.data_lock.release()
-        print(self.calibration.inst2data(pos))
-        return np.array(self.calibration.inst2data(pos))[0, :]
+        #print(self.calibration.inst2data(pos))
+        #return np.array(self.calibration.inst2data(pos))[0, :]   # TODO from Luka, dont know ...
+        return np.array(self.calibration.inst2data(pos))
 
     def slide_to_position(self, position):
         """Moves continuously to the position with the given speed"""
         # get the current position
         current_pos = self.get_position()
         position = np.array(position)
+        print(f'sliding {current_pos} -> {position}')
         # get delta
         delta_pos = current_pos - position
         duration = np.linalg.norm(delta_pos) / self.speed
@@ -73,12 +75,24 @@ class NanoCube(NIinst):
     def set_position(self, position, wait=False, slide=True, relative=False):
         """ sets the position and slides there. If wait is true the program is blocked until the movement is finished.
          If slide is False, goes to position instantaneously (this might introduce shaking of the system)"""
-        assert len(position) == 3
+        print('button action', position)
+        #assert len(position) == 3   # TODO ???
         assert self.speed > 0 and self.speed < 1000, 'Speed should be between 0 and 1000'
         if relative:
-            position = np.array(position)
+            # TODO very ugly code
+            #position = np.array(position)
+            #current_position = self.get_position()
+            #position += current_position
             current_position = self.get_position()
-            position += current_position
+            map_coordinate_index = {
+                'x': 0,
+                'y': 1,
+                'z': 2,
+            }
+            #print('current_position', current_position)
+            for k, v in position.items():
+                current_position[map_coordinate_index[k]] += v
+            position = current_position
         if slide:
             if not self.is_moving():
                 # start the position setting thread where the cube goes to the given position with the given speed

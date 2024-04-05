@@ -234,46 +234,52 @@ class SampleFieldsCalib(InstrumentCalibration):
 
 
 class NanoCubeCalib(NIoffsetScale):
-    def __init__(self, parameters, subinstruments):
+    def __init__(self, parameters):
+        # TODO remove commented code of angle dependence: subinstrument pi_rotator, zero_angle
         # get only the pi stage
-        rotation_stage = subinstruments.instruments['pi_rotator']
+        #rotation_stage = subinstruments.instruments['pi_rotator']
+        #InstrumentCalibration.__init__(
+        #    self, parameters, subinstruments=rotation_stage)
         InstrumentCalibration.__init__(
-            self, parameters, subinstruments=rotation_stage)
+            self, parameters)
         self.offset = np.array(self.parameters['offset'])
         self.scale = np.array(self.parameters['scale'])
-        self.zero_angle = float(self.parameters['zero_angle'])
+        #self.zero_angle = float(self.parameters['zero_angle'])
         if self.scale.ndim == 0:
             self.scale = self.scale[None, None]
 
-    def get_stage_angle(self):
-        """Gets the position of the stage with respect to the table coordinate system in radians"""
-        angle = self.subinstruments.get_data()
-        return np.radians(angle - self.zero_angle)
-
-    def get_transform_matrix(self):
-        angle = self.get_stage_angle()
-        c, s = np.cos(angle), np.sin(angle)
-        r = np.array([[c, 0, -s], [0, 1, 0], [s, 0, c]])
-        return r.dot(self.scale)
+    # def get_stage_angle(self):
+    #     """Gets the position of the stage with respect to the table coordinate system in radians"""
+    #     angle = self.subinstruments.get_data()
+    #     return np.radians(angle - self.zero_angle)
+    #
+    # def get_transform_matrix(self):
+    #     angle = self.get_stage_angle()
+    #     c, s = np.cos(angle), np.sin(angle)
+    #     r = np.array([[c, 0, -s], [0, 1, 0], [s, 0, c]])
+    #     return r.dot(self.scale)
 
     def data2inst(self, data):
         if data.shape[0] == 0:
             return data
-        R = self.get_transform_matrix()
+        #R = self.get_transform_matrix()
+        R = np.eye(3,3)
         data_calib = pd.DataFrame(np.array(data).dot(np.linalg.inv(R)) + self.offset, columns=data.columns,
                                   index=data.index)
-        if (data_calib > 10).any(axis=None) or (data_calib < -0.0001).any(axis=None):
-            warn('Nanocube out of range!')
-            data_calib[data_calib > 10] = 10
-            data_calib[data_calib < 0] = 0
-            return data_calib * 0
-        else:
-            return data_calib
+        # if (data_calib > 10).any(axis=None) or (data_calib < -0.0001).any(axis=None):
+        #     warn('Nanocube out of range!')
+        #     data_calib[data_calib > 10] = 10
+        #     data_calib[data_calib < 0] = 0
+        #     return data_calib * 0
+        # else:
+        #     return data_calib
+        return data_calib
 
     def is_in_range(self, data):
         if data.shape[0] == 0:
             return False
-        R = self.get_transform_matrix()
+        #R = self.get_transform_matrix()
+        R = np.eye(3, 3)
         data_calib = pd.DataFrame(np.array(data).dot(np.linalg.inv(R)) + self.offset, columns=data.columns,
                                   index=data.index)
         if (data_calib > 10).any(axis=None) or (data_calib < 0).any(axis=None):
@@ -284,9 +290,11 @@ class NanoCubeCalib(NIoffsetScale):
     def inst2data(self, data):
         if data.shape[0] == 0:
             return data
-        R = self.get_transform_matrix()
-        data_calib = pd.DataFrame(np.array(data - self.offset).dot(R), columns=data.columns,
-                                  index=data.index)
+        #R = self.get_transform_matrix()
+        print('data in calib', data)
+        #data_calib = pd.DataFrame(np.array(data - self.offset).dot(R), columns=data.columns,
+        #                          index=data.index)
+        data_calib = data - self.offset
         return data_calib
 
 
@@ -302,6 +310,7 @@ class HPSampleCalib(InstrumentCalibration):
             self.offset = np.array([0] * len(self.parameters['scale']))
         self.scale = np.array(self.parameters['scale'])
 
+        # TODO remove commented code concerning subinstrument angle dependence
         # if 'zero_angle' in parameters:
         #     self.zero_angle = float(self.parameters['zero_angle'])
         # else:

@@ -81,21 +81,19 @@
 	            "Dev1/ai2": "hallprobe_B",
 	            "Dev1/ai4": "hallprobe_C"
 			},
-            # TODO Used during calibration, remove later
+            /* TODO Used during calibration, remove later
 			"calibration": {
 				"type": "InstrumentCalibration"
-			}
-			# TODO redo this calibration after realigning hexapole
-			/*
+			} */
 			"calibration": {
 				"type": "HPSampleCalib",
 				"parameters": {
 					# volts in HPs to mT in table reference frame
-					"scale": [[-12.62722834179679, -15.555882861824347, -10.48532443798037], [-3.345805384352364, -4.429711419991506, -8.20835251552945], [9.569756107868283, 12.120959279298425, 5.001290606919113]],
+					"scale": [[12.06081707068405, -16.43105190302377, 4.558304908217234], [-14.03369938998217, -4.681902746619606, 17.74730301953106], [12.228775790445898, 11.619109116303783, 11.43677500099918]],
                     # angle between the senis FOR (already rotated by its calibration) and table FOR
 					"angle_senis2table": 0
 				}
-			} */
+			}
 		},
 		"hexapole": {
 			"type": "NIinst",
@@ -106,6 +104,10 @@
 	            "Dev2/ao2": "magnet_B",
 	            "Dev2/ao4": "magnet_C"
 			},
+			/* TODO Used during calibration, remove later
+			"calibration": {
+				"type": "InstrumentCalibration"
+			} */
 			"calibration": {
 				"type": "MagnetHystCalib",
 				"parameters": {
@@ -130,7 +132,6 @@
 				"type": "NIoffsetScale",
 				"parameters": {
 					# volts to mT
-					# TODO redo hallprobe calibration
 					'scale': [[-20, 0, 0], [0, 0, 20], [0, 20, 0]],   # flip hall FOR xyz->-xzy like table FOR
 					'offset': [0, 0, 0]
 				}

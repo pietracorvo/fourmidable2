@@ -15,7 +15,7 @@ class DefinePosition(QWidget):
         QWidget.__init__(self)
 
         # add a group box containing controls
-        input_box = QGroupBox("Define Position")
+        input_box = QGroupBox("Define Position NOTE This has been taken over from Smaract stage and not been adapted to Nanocube yet!")
 
         # add x, y and z input fields
         position_label = dict()

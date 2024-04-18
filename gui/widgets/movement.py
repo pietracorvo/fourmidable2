@@ -162,7 +162,7 @@ class MovementControl(QWidget):
         pos = self.position_history.pop()
         self._timer.stop()
         for p, value in zip(pos, self.position_value.values()):
-            value.setText(f'{p:.2f}')
+            value.setText(max(f'{p:.3f}', str(p)))
         self.move()
 
     def get_values(self):
@@ -200,7 +200,7 @@ class MovementControl(QWidget):
             position = self.get_positions()
         for p, value_edit in zip(position, self.position_value.values()):
             if not value_edit.hasFocus():
-                value_edit.setText(f'{p:.2f}')
+                value_edit.setText(max(f'{p:.3f}', str(p)))
 
     def relative_tick_ticked(self):
         if not self._timer.isActive():

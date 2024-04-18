@@ -68,7 +68,9 @@ class Moke(Instrument):
             pass
         # set the nanocube to 0
         try:
-            self.instruments["nanocube"].home()
+            # modified by alexander
+            # self.instruments["nanocube"].home()
+            self.instruments["stage"].home()
         except KeyError:
             pass
 

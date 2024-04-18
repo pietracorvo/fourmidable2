@@ -7,38 +7,33 @@ import pandas as pd
 
 
 class NanoCube(NIinst):
-    def __init__(self, *args, speed=100, **kwargs):
+    def __init__(self, *args, speed=999, **kwargs):
         """Creates nanocube instrument. It's a subclass of NIinst and accepts the same parameters, in addition to speed [um/s]"""
         self.speed = speed  # in um per s
         NIinst.__init__(self, *args, **kwargs)
         self.sliding_thread = threading.Thread()
 
         # TODO currently hardcoded, possibly move to settingsfile
-        self.direction_labels = ['x', 'y', 'z']
+        self.direction_labels = ['x [µm]', 'y [µm]', 'z [µm]']
 
     def is_in_range(self, position):
         data = pd.DataFrame([position])
         return self.calibration.is_in_range(data)
 
-    # def get_allowed_positions(self):
-    #     min_position = self.calibration.inst2data(pd.DataFrame([[0, 0, 0]])).values.T
-    #     max_position = self.calibration.inst2data(pd.DataFrame([[10, 10, 10]])).values.T
-    #     return np.hstack((min_position, max_position))
+    def get_allowed_positions(self):
+        min_position = self.calibration.inst2data(pd.DataFrame([[0, 0, 0]])).values.T
+        max_position = self.calibration.inst2data(pd.DataFrame([[10, 10, 10]])).values.T
+        return np.hstack((min_position, max_position))
 
     def get_position(self):
         # gets the last sample read
         self.data_lock.acquire(True)
         try:
-            #print('------------->', self.data_stream)
-            # pos = copy.deepcopy(self.data_stream[-1][-1:])   # TODO from Luka, dont know why he does it like this
             pos = copy.deepcopy(self.data_stream[-1][1:])
-            #print('------------->', pos)
         except IndexError:
             # if nothing in the data stream, means that you are at 0, 0, 0
             pos = pd.DataFrame(np.zeros((1, 3)), columns=self.ports.values())
         self.data_lock.release()
-        #print(self.calibration.inst2data(pos))
-        #return np.array(self.calibration.inst2data(pos))[0, :]   # TODO from Luka, dont know ...
         return np.array(self.calibration.inst2data(pos))
 
     def slide_to_position(self, position):
@@ -89,7 +84,6 @@ class NanoCube(NIinst):
                 'y': 1,
                 'z': 2,
             }
-            #print('current_position', current_position)
             for k, v in position.items():
                 current_position[map_coordinate_index[k]] += v
             position = current_position
@@ -110,3 +104,9 @@ class NanoCube(NIinst):
         Slides nanocube to the home position, middle of the range.
         """
         self.set_position([0, 0, 0])
+
+    # TODO dummies just addded to trace code execution
+    def is_referenced(self):
+        return [True, True, True]
+    def get_velocity(self):
+        return [1,2,3]

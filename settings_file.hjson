@@ -158,8 +158,10 @@
             "calibration": {
                 "type": "NanoCubeCalib",
                 "parameters": {
-                    'scale': 1,
-                    'offset': 0
+                    # input in microns: 1um = 0.1 Volt
+                    'scale': 0.1,
+                    # 5Volts is middle position of nanocube
+                    'offset': [5, 5, 5]
                 }
             }
             # TODO currently axes labels hard coded in NanoCube class

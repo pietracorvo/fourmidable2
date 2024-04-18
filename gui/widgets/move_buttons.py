@@ -15,9 +15,9 @@ class MovementButtons(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.step_label = QLabel("Step")
+        self.step_label = QLabel("Step [µm]")
         self.step_label.setMaximumWidth(100)
-        self.step_input = QLineEdit('50')
+        self.step_input = QLineEdit('1')
         self.step_input.setMaximumWidth(200)
 
         self.up_button = QPushButton()
@@ -82,7 +82,7 @@ class MovementButtons(QWidget):
         group_layout.addLayout(self.button_layout)
 
         # add a group box containing controls
-        group_box = QGroupBox("Smaract movement")
+        group_box = QGroupBox("Nanocube movement")
         group_box.setLayout(group_layout)
         main_layout = QVBoxLayout()
         main_layout.addWidget(group_box)
@@ -111,12 +111,12 @@ class MovementButtons(QWidget):
 
     def in_button_clicked(self):
         """Function called when in_button clicked"""
-        movement_direction = '+z'
+        movement_direction = '-z'
         self.move(movement_direction)
 
     def out_button_clicked(self):
         """Function called when out_button clicked"""
-        movement_direction = '-z'
+        movement_direction = '+z'
         self.move(movement_direction)
 
     def move(self, direction):

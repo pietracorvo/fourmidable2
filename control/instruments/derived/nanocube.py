@@ -41,7 +41,6 @@ class NanoCube(NIinst):
         # get the current position
         current_pos = self.get_position()
         position = np.array(position)
-        print(f'sliding {current_pos} -> {position}')
         # get delta
         delta_pos = current_pos - position
         duration = np.linalg.norm(delta_pos) / self.speed
@@ -70,7 +69,6 @@ class NanoCube(NIinst):
     def set_position(self, position, wait=False, slide=True, relative=False):
         """ sets the position and slides there. If wait is true the program is blocked until the movement is finished.
          If slide is False, goes to position instantaneously (this might introduce shaking of the system)"""
-        print('button action', position)
         #assert len(position) == 3   # TODO ???
         assert self.speed > 0 and self.speed < 1000, 'Speed should be between 0 and 1000'
         if relative:

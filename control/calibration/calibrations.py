@@ -263,7 +263,6 @@ class NanoCubeCalib(NIoffsetScale):
     def inst2data(self, data):
         if data.shape[0] == 0:
             return data
-        print('inst2data in calib', data)
         data_calib = (data - self.offset) / self.scale
         return data_calib
 
@@ -280,11 +279,6 @@ class HPSampleCalib(InstrumentCalibration):
             self.offset = np.array([0] * len(self.parameters['scale']))
         self.scale = np.array(self.parameters['scale'])
 
-        # TODO remove commented code concerning subinstrument angle dependence
-        # if 'zero_angle' in parameters:
-        #     self.zero_angle = float(self.parameters['zero_angle'])
-        # else:
-        #     self.zero_angle = 0
         if 'angle_senis2table' in parameters:
             self.angle_senis2table = float(self.parameters['angle_senis2table'])
         else:
@@ -293,17 +287,6 @@ class HPSampleCalib(InstrumentCalibration):
         if self.scale.ndim == 0:
             self.scale = self.scale[None, None]
 
-    # def get_stage_angle(self):
-    #     """Gets the position of the stage with respect to the table coordinate system in radians"""
-    #     angle = self.subinstruments.get_data()[3]
-    #     self.parameters['stage_rotation'] = angle
-    #     return np.radians(angle - self.zero_angle)
-    #
-    # def get_table2sample_matrix(self):
-    #     angle = self.get_stage_angle()
-    #     c, s = np.cos(angle), np.sin(angle)
-    #     R = np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
-    #     return R
     def get_senis2table_matrix(self):
         """Get matrix that rotates the FOR of the senis into table FOR"""
         angle = self.angle_senis2table
@@ -311,15 +294,6 @@ class HPSampleCalib(InstrumentCalibration):
         R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
         return R
 
-    # def data2inst(self, data):
-    #     if data.shape[0] == 0:
-    #         return data
-    #     # get the matrix for conversion between the table to sample frame
-    #     R = self.get_table2sample_matrix()
-    #     data_calib = pd.DataFrame((np.array(data).dot(np.linalg.inv(R)) - self.offset).dot(np.linalg.inv(np.transpose(self.scale))),
-    #                               columns=data.columns,
-    #                               index=data.index)
-    #     return data_calib
     def data2inst(self, data):
         if data.shape[0] == 0:
             return data
@@ -330,17 +304,6 @@ class HPSampleCalib(InstrumentCalibration):
                                   index=data.index)
         return data_calib
 
-    # def inst2data(self, data):
-    #     if data.shape[0] == 0:
-    #         return data
-    #     # get the matrix for conversion between the table to sample frame
-    #     R = self.get_table2sample_matrix()
-    #     # combine the transformations
-    #     M = np.transpose(self.scale).dot(R)
-    #     off = self.offset.dot(R)
-    #     data_calib = pd.DataFrame(np.array(data).dot(M) + off, columns=data.columns,
-    #                               index=data.index)
-    #     return data_calib
     def inst2data(self, data):
         if data.shape[0] == 0:
             return data

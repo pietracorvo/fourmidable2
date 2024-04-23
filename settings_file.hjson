@@ -94,8 +94,8 @@
 				"parameters": {
 					# volts in HPs to mT in table reference frame
 					"scale": [[12.06081707068405, -16.43105190302377, 4.558304908217234], [-14.03369938998217, -4.681902746619606, 17.74730301953106], [12.228775790445898, 11.619109116303783, 11.43677500099918]],
-                    # angle between the senis FOR (already rotated by its calibration) and table FOR
-					"angle_senis2table": 0
+                    # angle between the senis-FOR (already rotated by its calibration) and sample-FOR (rotate negative for clockwise around table-FOR z-direction)
+					"angle_senis2table": -135
 				}
 			}
 		},

@@ -2,18 +2,24 @@
 ================================================================
 
 NOTE I always mark cleanup, todos, questions in the code with the easily searchable sequence "# TODO"
+    (also Luka Skoric has left some open things with this mark)
 
 
 =========================
 OPEN TODOs:
-- CLEANUP hallprobe calibration
-- CLEANUP NanoCube calibration
-- CLEANUP NanoCube class
-- redo hallprobe calibration
-- integrate nanocube stage
+- CLEANUP general
+- Nanocube still has some things that are not working (realtive tickbox and calibrate stage experiment)
+    and it seems that the code for the stage reacts a little bit to slow (slower than the stage moves)
+    -> check this at a later moment
 - integrate quantalux
 - understand the PID
 
+
+
+2024-04-23:
+    - merged integrate-nanocube to master, use now master as production branch
+    - added -135deg to HP calibration
+    - I should check if the magents work as expected with all the calibrations now
 
 2024-04-10:
     - realigned hexapole and redone hallprobe calibration
@@ -21,9 +27,6 @@ OPEN TODOs:
         [[-12.62722834179679, -15.555882861824347, -10.48532443798037], [-3.345805384352364, -4.429711419991506, -8.20835251552945], [9.569756107868283, 12.120959279298425, 5.001290606919113]]
         new HPcalib matrix:
 		[[12.06081707068405, -16.43105190302377, 4.558304908217234], [-14.03369938998217, -4.681902746619606, 17.74730301953106], [12.228775790445898, 11.619109116303783, 11.43677500099918]]
-
-=========================
-LOG:
 
 2024-04-05:
     - started to integrate NanoCube

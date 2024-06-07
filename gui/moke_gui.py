@@ -17,7 +17,8 @@ from PyQt5.QtWidgets import *
 import display.instrument_plotting as instrument_plotting
 from gui.widgets import moke_docker, movement, experiment_selection, skm_window, \
     loop_widget, stage_properties, find_centre, eucentric_protocol, move_buttons, apply_field, \
-    apply_custom_field, find_max_signal, laser_button, hp_calibration
+    apply_custom_field, find_max_signal, laser_button, hp_calibration, \
+    apply_steps
 from control.instruments import NIinst
 from control.instruments.moke import Moke
 from gui.widgets.canvas import DynamicInstrumentPlot
@@ -60,7 +61,7 @@ class ApplicationWindow(QMainWindow):
         try:
             self.data_folder = self.settings_data["data_folder"]
         except KeyError:
-            self.data_folder = os.path.expanduser('~\\Documents\\3DMOKE')
+            self.data_folder = os.path.expanduser('~\\PycharmProjects')
         # check that the data folder exists. Otherwise, create it
         if not os.path.isdir(self.data_folder):
             os.mkdir(self.data_folder)
@@ -132,6 +133,10 @@ class ApplicationWindow(QMainWindow):
         self.experiments_menu.addAction(
             '&Apply Custom Field', self.start_apply_custom_field)
         self.apply_custom_field_window = None
+
+        self.experiments_menu.addAction(
+            '&Apply Field Steps', self.start_apply_steps)
+        self.apply_steps_window = None
 
         # add the calibration menu
         self.calibration_menu = QMenu('&Calibration', self)
@@ -225,6 +230,11 @@ class ApplicationWindow(QMainWindow):
         self.apply_custom_field_window = apply_custom_field.ApplyCustomField(
             self.moke)
         self.apply_custom_field_window.show()
+
+    def start_apply_steps(self):
+        self.apply_steps_window = apply_steps.ApplySteps(
+            self.moke)
+        self.apply_steps_window.show()
 
     def stage_properties(self):
         self.stage_properties_window = stage_properties.StageProperties(

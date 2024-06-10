@@ -323,6 +323,10 @@ class ApplicationWindow(QMainWindow):
         except:
             pass
         try:
+            self.apply_steps_window.close()
+        except:
+            pass
+        try:
             self.moke_docker.close()
         except:
             pass

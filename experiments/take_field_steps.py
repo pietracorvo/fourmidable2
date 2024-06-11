@@ -1,8 +1,10 @@
 import time
-from .basic import deGauss
-from experiments.basic import zero_magnet
+from time import sleep
 import threading
 import numpy as np
+
+from experiments.basic import zero_magnet, deGauss
+from experiments.take_loop import get_save_handle, append_save_instruments
 
 
 def take_steps(moke, signals, stop_event=None):
@@ -11,41 +13,74 @@ def take_steps(moke, signals, stop_event=None):
 
     Args:
         moke: handle to moke object
-        signals: Nx3 array of field points for the 3 magnets that are sequentially approached by PID
+        signals: Nx3 array of N field points for the 3 magnets that are sequentially approached by PID
         stop_event: Setting to True stops the loop
     """
 
     # function that is run in a thread
     def run_steps_experiment(moke, signals, stop_event):
 
+        saving_loc = None
+        f = get_save_handle(saving_loc)
+        grp = f.create_group('steps_experiment')
+        info_grp = grp.create_group('info')
+        inst_grp = grp.create_group('data')
+        step_grp = inst_grp.create_group('steps')
+
         hp = moke.instruments['hallprobe']
         hexapole = moke.instruments['hexapole']
 
-        Kp = 0.3
-        # for ID in PID, seems not to work
-        # Ki = 0.5
-        # Kd = 0.5
-        nb_points_used = 500
-        stop_criterion = 0.3 / 27.26  # noise less than 0.3mT
+        Kp = 0.5
+        # Ki = 0.5   # for I in PID, seems not to work
+        # Kd = 0.5   # for D in PID, seems not to work
+        nb_points_used_for_tuning = 1000   # 1 point should equal 0.0001s
+        stop_criterion_tuning = 0.05  # noise less than X mT (do not go 0.2 mT)
+        info_grp.attrs['nb_points_used_for_tuning'] = nb_points_used_for_tuning
+        info_grp.attrs['Kp'] = Kp
+        info_grp.attrs['stop_criterion_tuning_mT'] = stop_criterion_tuning
 
         deGauss(moke)
 
-        for signal in signals:
-            # previous_error = np.zeros((nb_points_used, 3))
-            # integral = np.zeros((nb_points_used, 3))
+        start_time = hexapole.get_data(start_time=0, end_time=-1).index[-1]
+        last_signal_end_time = start_time
+        sleep(0.1)
+        # TODO when choosing Kp=0.3 only last 10s of signal is recorded
+        #print('start_time', start_time)
+        for i, signal in enumerate(signals):
+            # previous_error = np.zeros((nb_points_used_for_tuning, 3))
+            # integral = np.zeros((nb_points_used_for_tuning, 3))
+
             while True:
-                if (stop_event is not None) and (stop_event.is_set()):
+                if stop_event.is_set():
                     zero_magnet(moke)
                     return
 
-                signal_measured = hp.get_data(start_time=0, end_time=-1).iloc[-nb_points_used:, :]
-                output_data = hexapole.get_data(start_time=0, end_time=-1).values[-nb_points_used:, :]
+                # Just get the last nb_points_used_for_tuning of hexapole & hp for PID
+                signal_measured = hp.get_data(start_time=last_signal_end_time,
+                                              end_time=-1).iloc[-nb_points_used_for_tuning:, :]
+                output_data = hexapole.get_data(start_time=last_signal_end_time,
+                                                end_time=-1).iloc[-nb_points_used_for_tuning:, :]
+                if len(signal_measured) < 1 or len(output_data) != len(signal_measured):
+                    sleep(0.0001)
+                    continue
                 signal_wanted = signal_measured.copy()
-                signal_wanted.iloc[:, :] = signal
+                signal_wanted.iloc[:, :] = signal  # put constant signal at all times
                 error = hp.calibration.data2inst(signal_measured - signal_wanted).values
 
-                if np.max(np.abs(error)) < stop_criterion:
-                    # print('Stopped tuning', '(Max tuning error: ', 27.26 * np.max(error), ' mT)')
+                # Stop tuning for targeted signal if current signal is good enough
+                error_in_millitesla = (signal_measured - signal_wanted).values
+                if np.mean(np.abs(error_in_millitesla)) < stop_criterion_tuning:
+                    # save data
+                    current_signal_end_time = output_data.index[-1]
+                    append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe'],
+                                     start_time=last_signal_end_time, end_time=current_signal_end_time)
+                    nth_step_grp = step_grp.create_group(str(i))
+                    nth_step_grp.attrs['time_signal_stability_reached'] = current_signal_end_time
+                    nth_step_grp.attrs['target_signal'] = signal
+                    nth_step_grp.attrs['hp_measured_signal'] = signal_measured.iloc[-1, :].values
+                    last_signal_end_time = current_signal_end_time
+                    # print(f'step {i}, {last_signal_end_time}s: reached {signal_measured.iloc[-1, :].values} mT '
+                    #       + f'(tuning error: {error_in_millitesla[-1, :]} mT)')
                     break
 
                 correction = np.zeros(error.shape)
@@ -55,6 +90,8 @@ def take_steps(moke, signals, stop_event=None):
                 # derivative = error - previous_error
                 # correction += Kd * derivative
                 # previous_error = error.copy()
+
+                output_data = output_data.values
                 output_data += correction
                 output_data[:, :] = output_data.mean(0)
                 current_signal = np.array([
@@ -63,14 +100,12 @@ def take_steps(moke, signals, stop_event=None):
                     lambda x: output_data[-1, 2] * np.ones(len(x))
                 ])
                 hexapole.stage_data(current_signal, 0.1, use_calibration=False, autostart=True, index_reset=True)
-                # seems to be needed, do not make this too small
-                time.sleep(0.1)
 
-        print('Finishesd step experminet, zeroing magents')
         zero_magnet(moke)
-        print('Zeroed the magnet')
+        print('Finished step experiment, zeroing magnets')
+        f.file.close()
 
     tuning_thread = threading.Thread(target=run_steps_experiment,
-                                          args=[moke, signals, stop_event])
+                                     args=[moke, signals, stop_event])
     tuning_thread.daemon = True
     tuning_thread.start()

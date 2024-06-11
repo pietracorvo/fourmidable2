@@ -243,7 +243,6 @@ def append_save_instruments(moke, grp, saving_instruments, start_time, end_time)
             data = data.values
             old_shape = grp[inst]['data'].shape
             new_shape = (old_shape[0] + data.shape[0], old_shape[1])
-            print(old_shape, new_shape)
             grp[inst]['data'].resize(new_shape)
             grp[inst]['data'][old_shape[0]:,:] = data
 

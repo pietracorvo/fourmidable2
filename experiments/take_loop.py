@@ -229,6 +229,24 @@ def save_instruments(moke, inst_grp, saving_instruments, start_time, end_time):
         moke.instruments[inst].save(inst_grp, start_time=start_time,
                                     end_time=end_time)
 
+def append_save_instruments(moke, grp, saving_instruments, start_time, end_time):
+    """
+    Same like save_instruments, but appends data if group already present.
+    """
+    for inst in saving_instruments:
+        try:
+            save_instruments(moke, grp, [inst], start_time, end_time)
+        except ValueError:
+            # append if group already present
+            data = moke.instruments[inst].get_data(start_time=start_time, end_time=end_time)
+            data = data.reset_index()
+            data = data.values
+            old_shape = grp[inst]['data'].shape
+            new_shape = (old_shape[0] + data.shape[0], old_shape[1])
+            print(old_shape, new_shape)
+            grp[inst]['data'].resize(new_shape)
+            grp[inst]['data'][old_shape[0]:,:] = data
+
 def send_data_callback(moke, data_callback, saving_instruments, start_time, end_time):
     inst_data = dict()
     for inst in saving_instruments:

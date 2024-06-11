@@ -469,7 +469,8 @@ class NIinst(Instrument):
 
     def save_data(self, group, data):
         # save the data
-        group.create_dataset("data", data=data.reset_index().values)
+        group.create_dataset("data", data=data.reset_index().values,
+                             maxshape=(None, None), chunks=True)   # make arrays resizable
         # add columns and a timestamp to attributes
         group.attrs["timestamp"] = str(datetime.now())
         group.attrs["columns"] = np.array(

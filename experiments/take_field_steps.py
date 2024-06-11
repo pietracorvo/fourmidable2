@@ -44,8 +44,6 @@ def take_steps(moke, signals, stop_event=None):
         start_time = hexapole.get_data(start_time=0, end_time=-1).index[-1]
         last_signal_end_time = start_time
         sleep(0.1)
-        # TODO when choosing Kp=0.3 only last 10s of signal is recorded
-        #print('start_time', start_time)
         for i, signal in enumerate(signals):
             # previous_error = np.zeros((nb_points_used_for_tuning, 3))
             # integral = np.zeros((nb_points_used_for_tuning, 3))

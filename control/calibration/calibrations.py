@@ -289,7 +289,7 @@ class HPSampleCalib(InstrumentCalibration):
 
     def get_senis2table_matrix(self):
         """Get matrix that rotates the FOR of the senis into table FOR"""
-        angle = self.angle_senis2table
+        angle = self.angle_senis2table * np.pi/180
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
         return R

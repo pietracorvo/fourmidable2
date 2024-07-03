@@ -52,6 +52,50 @@ class ApplySteps(QWidget):
                    # [2, 0, 0],
                    # [0, 0, 0],
                    ]
+
+        # signals = np.zeros((500,3))
+
+        amplitude = 15
+        nb_steps = 120
+        nb_cycles = 2
+
+        # cycle = (np.linspace(amplitude, -amplitude, 2*nb_steps).tolist()
+        #          + np.linspace(-amplitude, amplitude, 2*nb_steps).tolist()[1:])
+        # sequence = np.linspace(0, amplitude, nb_steps).tolist() + 2 * cycle
+        # signals = np.array([
+        #     np.zeros(len(sequence)),
+        #     np.zeros(len(sequence)),
+        #     sequence,
+        # ]).T
+
+        amplitude = 15
+        nb_steps = 60
+        nb_cycles = 2
+        seq = []
+        for i in np.linspace(0, 2 * np.pi, nb_steps):
+            #seq.append([amplitude*np.sin(i), 0., amplitude*np.cos(i)])
+            seq.append([0., 0., amplitude * np.sin(i)])
+        # seq = seq[:-1]
+        seq *= nb_cycles
+        # start = []
+        # for i in np.linspace(0, amplitude, nb_steps):
+        #     start.append([0., 0., i])
+        # seq = start + seq
+        signals = np.array(seq)
+
+        # cycle = [7.5, 8., 8.5, 9., 9.5, 10., 10.5, 11., 11.5, 12, 13.5, 15.]
+        # #cycle = np.linspace(0, 15, 40).tolist()
+        # tmp = cycle[:-1].copy()
+        # tmp.reverse()
+        # cycle += tmp
+        # cycle += [-x for x in cycle]
+        # cycle *= 2
+        # signals = np.array([
+        #     np.zeros(len(cycle)),
+        #     np.zeros(len(cycle)),
+        #     cycle,
+        # ]).T
+
         self.tune_stop = threading.Event()
         take_steps(self.moke, signals, self.tune_stop)
 

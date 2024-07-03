@@ -11,8 +11,9 @@ OPEN TODOs:
 - Nanocube still has some things that are not working (realtive tickbox and calibrate stage experiment)
     and it seems that the code for the stage reacts a little bit to slow (slower than the stage moves)
     -> check this at a later moment
-- integrate quantalux
-- understand the PID
+- quantalux add more gui controls (binning, show histogram, color image, autoadjsutrange)
+- do not block thorlabs software while gui running (? maybe just run sdk when really needed)
+- make gui  for "apply field steps" experiment
 
 
 

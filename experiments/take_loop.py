@@ -182,14 +182,17 @@ def start_signal(moke, signal, period, tune_loop=False):
 
 def get_save_handle(saving_loc):
     # check if the saving_loc is None, path or group, proceed accordingly
+    default_filename = 'LoopTaking_' + \
+               time.strftime("%Y%m%d-%H%M%S") + '.h5'
     if saving_loc is None:
-        filename = 'LoopTaking_' + \
-            time.strftime("%Y%m%d-%H%M%S") + '.h5'
-        filepath = os.path.join(os.getcwd(), filename)
+        filepath = os.path.join(os.getcwd(), default_filename)
         print('Saving to ', filepath)
         f = h5py.File(filepath, 'a')
     elif isinstance(saving_loc, str):
-        filepath = saving_loc
+        if os.path.isdir(saving_loc):
+            filepath = os.path.join(os.path.abspath(saving_loc), default_filename)
+        else:
+            filepath = saving_loc
         print('Saving to ', filepath)
         f = h5py.File(filepath, 'a')
     else:

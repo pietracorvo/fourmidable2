@@ -53,6 +53,7 @@ class MokeDocker(QWidget):
                 "wollaston1_composite",
                 "camera1",
                 "camera2",
+                "quanta_camera",
                 # "3D_fields"
                 "console"
             ]

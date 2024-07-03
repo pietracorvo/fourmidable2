@@ -88,6 +88,7 @@ class ApplicationWindow(QMainWindow):
             #"wollaston2_fft": False,
             #"camera1": True,
             #"camera2": True,
+            "quanta_camera": True,
             "3D_fields": False,
             "console": False,
             "hallprobe": True,

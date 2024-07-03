@@ -2,7 +2,7 @@ import numpy as np
 import pyqtgraph as pg
 from scipy.fftpack.helper import next_fast_len
 import data.live_processing as processing
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtCore, QtWidgets
 import traceback
 import pandas as pd
 from control.calibration import NIoffsetScale, HPSampleCalib
@@ -275,6 +275,8 @@ class WollastonPlotting(NIPlotting):
 
 class CameraPlotting(InstrumentPlotting):
     def __init__(self, device, plt=None, view=None, crosshair=True):
+        self.device = device
+
         if view is None:
             self.view = pg.GraphicsView()
             self.view.setAspectLocked(True)
@@ -293,6 +295,36 @@ class CameraPlotting(InstrumentPlotting):
             self.view.addItem(self.hLine, ignoreBounds=True)
         self.first_plot = True
         self.crosshair = crosshair
+
+        # if the camera is from instruments/camera_quantalux.py add also an extra panel with control buttons
+        if hasattr(device, 'camera'):
+            # TODO when moving camera dock i get an error
+            input_exposuretime = QtWidgets.QSpinBox()
+            input_exposuretime.setMinimum(device.exposure_time_range_us[0])
+            input_exposuretime.setMaximum(device.exposure_time_range_us[1])
+            input_exposuretime.setValue(device.exposure_time_us)
+            def update_exposure_time():
+                device.exposure_time_us = input_exposuretime.value()
+            input_exposuretime.valueChanged.connect(update_exposure_time)
+            label_framerate = QtWidgets.QLabel()
+            def update_framerate():
+                if isinstance(device.current_framerate, float):
+                    label_framerate.setText(str(round(device.current_framerate, 3)))
+            self.timer = QtCore.QTimer()
+            self.timer.timeout.connect(update_framerate)
+            self.timer.start(100)
+            layout_input = QtWidgets.QGridLayout()
+            layout_input.addWidget(QtWidgets.QLabel('Frames Per Second'), 1, 1)
+            layout_input.addWidget(label_framerate, 1, 2)
+            layout_input.addWidget(QtWidgets.QLabel('Exposure time [µs]'), 2, 1)
+            layout_input.addWidget(input_exposuretime, 2, 2)
+            # TODO
+            #layout_input.addWidget(self.button_crop_camera_to_roi, 1, 3)
+            #layout_input.addWidget(self.button_toggle_roi, 2, 3)
+            layout_container = QtWidgets.QWidget()
+            layout_container.setLayout(layout_input)
+            self.view.scene().addWidget(layout_container)
+
 
     def get_plot_data(self):
         return self.device.get_data()

@@ -1,4 +1,3 @@
-import time
 from time import sleep
 import threading
 import numpy as np
@@ -20,7 +19,7 @@ def take_steps(moke, signals, stop_event=None):
     # function that is run in a thread
     def run_steps_experiment(moke, signals, stop_event):
 
-        saving_loc = None
+        saving_loc = 'D:\\DATA_RabensteinerAlexander\\2024-06-12_testMeasurementSP2291\\2024-07-03'
         f = get_save_handle(saving_loc)
         grp = f.create_group('steps_experiment')
         info_grp = grp.create_group('info')
@@ -29,13 +28,17 @@ def take_steps(moke, signals, stop_event=None):
 
         hp = moke.instruments['hallprobe']
         hexapole = moke.instruments['hexapole']
+        camera_quanta = moke.instruments['quanta_camera']
 
+        nb_images_per_step = 20
+        only_save_average_of_images = False
         Kp = 0.5
         # Ki = 0.5   # for I in PID, seems not to work
         # Kd = 0.5   # for D in PID, seems not to work
         nb_points_used_for_tuning = 1000   # 1 point should equal 0.0001s
-        stop_criterion_tuning = 0.05  # noise less than X mT (do not go 0.2 mT)
+        stop_criterion_tuning = 0.05  # noise less than X mT
         info_grp.attrs['nb_points_used_for_tuning'] = nb_points_used_for_tuning
+        info_grp.attrs['nb_images_per_step'] = nb_images_per_step
         info_grp.attrs['Kp'] = Kp
         info_grp.attrs['stop_criterion_tuning_mT'] = stop_criterion_tuning
 
@@ -65,10 +68,14 @@ def take_steps(moke, signals, stop_event=None):
                 signal_wanted.iloc[:, :] = signal  # put constant signal at all times
                 error = hp.calibration.data2inst(signal_measured - signal_wanted).values
 
-                # Stop tuning for targeted signal if current signal is good enough
+                # Stop tuning for targeted signal if current signal is good enough, take images and save them
                 error_in_millitesla = (signal_measured - signal_wanted).values
                 if np.mean(np.abs(error_in_millitesla)) < stop_criterion_tuning:
-                    # save data
+                    image_data = []
+                    for j in range(nb_images_per_step):
+                        image_data.append(camera_quanta.get_data().copy())
+                        #print(i,j)   # TODO remove
+                    image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate
                     current_signal_end_time = output_data.index[-1]
                     append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe'],
                                      start_time=last_signal_end_time, end_time=current_signal_end_time)
@@ -76,9 +83,12 @@ def take_steps(moke, signals, stop_event=None):
                     nth_step_grp.attrs['time_signal_stability_reached'] = current_signal_end_time
                     nth_step_grp.attrs['target_signal'] = signal
                     nth_step_grp.attrs['hp_measured_signal'] = signal_measured.iloc[-1, :].values
-                    last_signal_end_time = current_signal_end_time
-                    # print(f'step {i}, {last_signal_end_time}s: reached {signal_measured.iloc[-1, :].values} mT '
+                    if only_save_average_of_images:
+                        image_data = np.mean(image_data, axis=2)
+                    nth_step_grp.create_dataset('image_data', data=image_data)
+                    # print(f'step {i}, {current_signal_end_time}s: reached {signal_measured.iloc[-1, :].values} mT '
                     #       + f'(tuning error: {error_in_millitesla[-1, :]} mT)')
+                    last_signal_end_time = current_signal_end_time
                     break
 
                 correction = np.zeros(error.shape)
@@ -91,13 +101,14 @@ def take_steps(moke, signals, stop_event=None):
 
                 output_data = output_data.values
                 output_data += correction
-                output_data[:, :] = output_data.mean(0)
+                output_data[:, :] = output_data.mean(0)   # apply mean instead of error from noisy hallprobes
                 current_signal = np.array([
                     lambda x: output_data[-1, 0] * np.ones(len(x)),
                     lambda x: output_data[-1, 1] * np.ones(len(x)),
                     lambda x: output_data[-1, 2] * np.ones(len(x))
                 ])
-                hexapole.stage_data(current_signal, 0.1, use_calibration=False, autostart=True, index_reset=True)
+                hexapole.stage_data(current_signal, 0.1, use_calibration=False,
+                                    autostart=True, index_reset=True)
 
         zero_magnet(moke)
         print('Finished step experiment, zeroing magnets')

@@ -60,11 +60,16 @@ class ApplicationWindow(QMainWindow):
         # try setting the data folder, fallback to default
         try:
             self.data_folder = self.settings_data["data_folder"]
-        except KeyError:
-            self.data_folder = os.path.expanduser('~\\PycharmProjects')
+        except Exception as e:
+            print(f'Unable to get last data folder {self.data_folder}, default to {os.getcwd()}')
+            self.data_folder = os.getcwd()
         # check that the data folder exists. Otherwise, create it
         if not os.path.isdir(self.data_folder):
-            os.mkdir(self.data_folder)
+            try:
+                os.mkdir(self.data_folder)
+            except Exception:
+                print(f'Unable to create data folder {self.data_folder}, default to {os.getcwd()}')
+                self.data_folder = os.getcwd()
 
         # set toolbars and their actions
         self.file_menu = QMenu('&File', self)
@@ -234,7 +239,7 @@ class ApplicationWindow(QMainWindow):
 
     def start_apply_steps(self):
         self.apply_steps_window = apply_steps.ApplySteps(
-            self.moke)
+            self.moke, data_folder=self.data_folder)
         self.apply_steps_window.show()
 
     def stage_properties(self):
@@ -288,10 +293,10 @@ class ApplicationWindow(QMainWindow):
 
     def set_data_folder(self):
         """Allows the user to set the data directory"""
-        print('This does nothing at the moment. Contact Luka if you want it implemented')
-        # folder = str(QFileDialog.getExistingDirectory(
-        #     self, "Select Directory"))
-        # print(folder)
+        #print('This does nothing at the moment. Contact Luka if you want it implemented')
+        folder = str(QFileDialog.getExistingDirectory(
+            self, "Select Directory"))
+        self.data_folder = folder
 
     def find_max_signal(self):
         """Moves the nanocube around to find the maximum signal"""
@@ -303,6 +308,7 @@ class ApplicationWindow(QMainWindow):
         try:
             print('Saving GUI settings')
             self.settings_data["docks"] = self.available_docks
+            self.settings_data["data_folder"] = self.data_folder
             with open(self.settings_file_path, 'w') as file:
                 hjson.dump(self.settings_data, file)
         except:

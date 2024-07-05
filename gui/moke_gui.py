@@ -18,7 +18,7 @@ import display.instrument_plotting as instrument_plotting
 from gui.widgets import moke_docker, movement, experiment_selection, skm_window, \
     loop_widget, stage_properties, find_centre, eucentric_protocol, move_buttons, apply_field, \
     apply_custom_field, find_max_signal, laser_button, hp_calibration, \
-    apply_steps
+    apply_steps, camera_quantalux_settings
 from control.instruments import NIinst
 from control.instruments.moke import Moke
 from gui.widgets.canvas import DynamicInstrumentPlot
@@ -179,6 +179,11 @@ class ApplicationWindow(QMainWindow):
         self.moke_docker.sigDockClosed.connect(self.dock_closed_event)
         self.moke_docker.setMinimumSize(200, 200)
 
+        # button to open camera settings
+        self.camera_settings_window = None
+        self.button_open_camera_settings = QPushButton('Open camera settings')
+        self.button_open_camera_settings.clicked.connect(self.open_camera_settings)
+
         # create movement control widget
         stage = moke.instruments['stage']
         instruments_to_control = [stage]
@@ -204,6 +209,7 @@ class ApplicationWindow(QMainWindow):
 
         vlayout = QVBoxLayout()
         #vlayout.addWidget(self.laser_button)
+        vlayout.addWidget(self.button_open_camera_settings)
         vlayout.addWidget(self.movement_control)
         vlayout.addWidget(self.move_buttons)
 
@@ -241,6 +247,10 @@ class ApplicationWindow(QMainWindow):
         self.apply_steps_window = apply_steps.ApplySteps(
             self.moke, data_folder=self.data_folder)
         self.apply_steps_window.show()
+
+    def open_camera_settings(self):
+        self.camera_settings_window = camera_quantalux_settings.CameraQuantaluxSettings(self.moke)
+        self.camera_settings_window.show()
 
     def stage_properties(self):
         self.stage_properties_window = stage_properties.StageProperties(
@@ -331,6 +341,10 @@ class ApplicationWindow(QMainWindow):
             pass
         try:
             self.apply_steps_window.close()
+        except:
+            pass
+        try:
+            self.camera_settings_window.close()
         except:
             pass
         try:

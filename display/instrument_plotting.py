@@ -299,13 +299,6 @@ class CameraPlotting(InstrumentPlotting):
         # if the camera is from instruments/camera_quantalux.py add also an extra panel with control buttons
         if hasattr(device, 'camera'):
             # TODO when moving camera dock i get an error
-            input_exposuretime = QtWidgets.QSpinBox()
-            input_exposuretime.setMinimum(device.exposure_time_range_us[0])
-            input_exposuretime.setMaximum(device.exposure_time_range_us[1])
-            input_exposuretime.setValue(device.exposure_time_us)
-            def update_exposure_time():
-                device.exposure_time_us = input_exposuretime.value()
-            input_exposuretime.valueChanged.connect(update_exposure_time)
             label_framerate = QtWidgets.QLabel()
             def update_framerate():
                 if isinstance(device.current_framerate, float):
@@ -316,11 +309,6 @@ class CameraPlotting(InstrumentPlotting):
             layout_input = QtWidgets.QGridLayout()
             layout_input.addWidget(QtWidgets.QLabel('Frames Per Second'), 1, 1)
             layout_input.addWidget(label_framerate, 1, 2)
-            layout_input.addWidget(QtWidgets.QLabel('Exposure time [µs]'), 2, 1)
-            layout_input.addWidget(input_exposuretime, 2, 2)
-            # TODO
-            #layout_input.addWidget(self.button_crop_camera_to_roi, 1, 3)
-            #layout_input.addWidget(self.button_toggle_roi, 2, 3)
             layout_container = QtWidgets.QWidget()
             layout_container.setLayout(layout_input)
             self.view.scene().addWidget(layout_container)
@@ -331,7 +319,7 @@ class CameraPlotting(InstrumentPlotting):
 
     def plot(self):
         data = np.rot90(self.get_plot_data(), k=3).astype(np.uint8)
-        if self.first_plot and self.crosshair:
+        if self.crosshair:
             self.vLine.setPos(data.shape[0] / 2)
             self.hLine.setPos(data.shape[1] / 2)
         self.plt.setImage(data, autoDownsample=False)

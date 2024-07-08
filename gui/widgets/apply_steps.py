@@ -1,5 +1,7 @@
 import sys
 import os
+
+import pandas as pd
 from PyQt5.QtWidgets import *
 import pyqtgraph as pg
 import numpy as np
@@ -17,12 +19,16 @@ import threading
 
 
 class ApplySteps(QWidget):
-    #sigUpdatePlot = pyqtSignal()
 
     def __init__(self, moke, data_folder=''):
         super().__init__()
         self.setWindowTitle('Apply field steps experiment ')
         self.moke = moke
+        self.stop_event = threading.Event()
+        # self.plotting_data = pd.DataFrame(columns=[
+        #     't', 'Bx', 'By', 'Bz', 'sum camera intensity'
+        # ])
+        self.plotting_data = []
 
         # set the data folder, and make sure it exists
         if not data_folder:
@@ -39,26 +45,29 @@ class ApplySteps(QWidget):
         self.params.sigTreeStateChanged.connect(self.params_changed)
         self.paramtree = ParameterTree()
         self.paramtree.setParameters(self.params, showTop=False)
-        self.paramtree.setMinimumWidth(500)
-        self.paramtree.setMaximumWidth(600)
         self.dock_area = DockArea()
         layout = QHBoxLayout()
         layout.addWidget(self.paramtree)
         layout.addWidget(self.dock_area)
         self.setLayout(layout)
-        self.resize(1200, 500)
+        self.resize(1200, 700)
 
-        plot = pg.PlotWidget()
-        dock = Dock('Hysteresis', widget=plot, closable=False)
-        self.dock_area.addDock(dock)
+        self.plots = [pg.PlotWidget(), pg.PlotWidget()]
+        dock0 = Dock('Hysteresis', widget=self.plots[0], closable=False)
+        self.dock_area.addDock(dock0)
+        dock1 = Dock('Time signal', widget=self.plots[1], closable=False)
+        self.dock_area.addDock(dock1)
 
     def run_experiment(self):
+        self.plotting_data = []
         experiment_parameters = self.create_experiment_params_dict()
         signals = self.create_signal_from_parameters()
         self.tune_stop = threading.Event()
 
         tuning_thread = threading.Thread(target=take_steps,
-                                         args=[self.moke, signals, self.tune_stop, self.saving_dir, experiment_parameters])
+                                         args=[self.moke, signals, self.tune_stop,
+                                               self.saving_dir, self.update_plot_data,
+                                               experiment_parameters])
         tuning_thread.daemon = True
         tuning_thread.start()
 
@@ -71,21 +80,19 @@ class ApplySteps(QWidget):
             zero_magnet(self.moke)
             print('Zeroed the magnet')
 
+    def closeEvent(self, event):
+        # Stop the tuning thread and zero magnets when closing the window
+        self.stop_experiment()
+
     def params_changed(self, param, changes):
         """Function called whenever one of the parameters is changed"""
         for param, change, data in changes:
-            #print(param, change, data)
             if change == "value":
                 if param.name() == 'Saving dir':
                     self.saving_dir = data
-            #     path = self.params.childPath(param)
-            #     if path[0] == 'Experiment Parameters' and param.name() == "Use custom signal" and param.value():
-            #         if self.experiment_parameters_entries.custom_signal_path.value() == '':
-            #             self.experiment_parameters_entries.custom_signal_path.setValue(
-            #                 self.get_filepath())
-            #     elif path[0] == 'Plotting':
-            #         self.plotting_parameters.params_changed(path, data)
-            #         self.update_plot()
+                if (param.name() == 'Field to plot' or
+                        param.name() == 'Data processing'):
+                    self.update_plot()
             elif change == "activated":
                 if param.name() == "Run":
                     self.run_experiment()
@@ -103,7 +110,7 @@ class ApplySteps(QWidget):
 
     def create_signal_from_parameters(self):
         if self.params.child("Signal", "Custom signal", "Use custom signal").value():
-            path = self.params.child( "Signal", "Custom signal", "Path").value()
+            path = self.params.child("Signal", "Custom signal", "Path").value()
             print(f'Loading signal from {path}')
             signals = np.loadtxt(path)
             assert signals.shape[1] == 3, 'Wrong signal in CSV file, must have 3 columns'
@@ -146,6 +153,40 @@ class ApplySteps(QWidget):
         expprms['stop_criterion_tuning_mT'] = self.params.child("Running the experiment", "PID tuning", "Mean error HP stop criterion").value()
         return expprms
 
+    def update_plot_data(self, t, fields, image):
+        self.plotting_data.append({
+            't': t, 'Bx': fields[0], 'By': fields[1], 'Bz': fields[2],
+            'sum camera intensity': np.sum(image)
+        })
+        self.update_plot()
+
+    def update_plot(self):
+        data = pd.DataFrame(self.plotting_data)
+        if len(data) == 0:
+            return
+        selected_field = self.params.child("Plotting", "Field to plot").value()
+        data_processing = self.params.child("Plotting", "Data processing").value()
+        if data_processing == 'average loops':
+            nb_steps = self.params.child("Signal", "Predefined signals", "Number of points per repetition").value()
+            len_data = len(data['sum camera intensity'])
+            fields = np.zeros(min(nb_steps, len(data)))
+            intensities = np.zeros(min(nb_steps, len(data)))
+            for i in range(0, len_data, nb_steps):
+                for j in range(nb_steps):
+                    #print(i,j,len_data)
+                    if i+j < len_data:
+                        # just average intensities over one loop
+                        intensities[j] += data['sum camera intensity'][i+j]
+                        # and take fields from last loop
+                        fields[j] = data[selected_field][i+j]
+            intensities /= np.array([int(len_data/nb_steps+1)]*(len_data%nb_steps)
+                                    + [int(len_data/nb_steps)]*(nb_steps-len_data%nb_steps))[:len_data]
+        else:
+            fields = data[selected_field]
+            intensities = data['sum camera intensity']
+        self.plots[0].plot(fields, intensities, clear=True, symbol='x')
+        self.plots[1].plot(data['t'], data['sum camera intensity'], clear=True, symbol='x')
+
     def get_filepath(self):
         file_path = QFileDialog.getOpenFileName(
             self, "Select file", "", "CSV (*.csv)")[0]
@@ -164,9 +205,9 @@ params_dict = [
             {"name": "Saving dir", "type": "str", "value": ""},
             {"name": "Run", "type": "action"},
             {"name": "Stop", "type": "action"},
-            {"name": "Number of repetitions", "type": "int", "value": 2, "limits": [-1, 10 ** 100]},
+            {"name": "Number of repetitions", "type": "int", "value": -1, "limits": [-1, 10 ** 100]},
             {"name": "deGauss", "type": "bool", "value": True},
-            {"name": "Number images per step", "type": "int", "value": 10, "limits": [1, 10**100]},
+            {"name": "Number images per step", "type": "int", "value": 5, "limits": [1, 10**100]},
             {"name": "Only save average of images", "type": "bool", "value": True},
             {
                 "name": "PID tuning",
@@ -188,8 +229,8 @@ params_dict = [
                 "name": "Predefined signals",
                 "type": "group",
                 "children": [
-                    {"name": "Number of points per repetition", "type": "int", "value": 60, "limits": [1, 10 ** 100]},
-                    {"name": "Signal type", "type": "list", "limits": ["sinus", "triangle"], "value": "sinus"},
+                    {"name": "Number of points per repetition", "type": "int", "value": 50, "limits": [1, 10 ** 100]},
+                    {"name": "Signal type", "type": "list", "limits": ["triangle", "sinus"], "value": "triangle"},
                     {
                         "name": "Amplitudes",
                         "type": "group",
@@ -234,6 +275,16 @@ params_dict = [
             },
         ],
     },
+    {
+        "name": "Plotting",
+        "type": "group",
+        "children": [
+            {"name": "Field to plot", "type": "list", "limits": ["Bx", "By", "Bz"], "value": "Bx"},
+            {"name": "Data processing", "type": "list", "limits": ["none", "average loops"], "value": "none"},
+            {'name': 'TODO Apply drift correction', 'type': 'bool', 'value': False},
+            {'name': 'TODO Compensate Faraday effect', 'type': 'bool', 'value': False},
+        ],
+    }
 ]
 
 

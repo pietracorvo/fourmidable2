@@ -7,7 +7,7 @@ from experiments.take_loop import get_save_handle, append_save_instruments
 
 
 # function that is run in a thread by take_steps
-def take_steps(moke, signals, stop_event, saving_loc, experiment_parameters):
+def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_parameters):
     """
     Degauss and then use the pid to sequentially approach constant fields, trigger images
     of the camera and save them fo HDF.
@@ -53,9 +53,9 @@ def take_steps(moke, signals, stop_event, saving_loc, experiment_parameters):
 
     idx_loop = 0
     idx_step = 0
-    while idx_loop < n_loops:
+    while idx_loop < n_loops or n_loops == -1:
         idx_loop += 1
-        for signal in signals:
+        for i, signal in enumerate(signals):
             # previous_error = np.zeros((nb_points_used_for_tuning, 3))
             # integral = np.zeros((nb_points_used_for_tuning, 3))
 
@@ -75,15 +75,15 @@ def take_steps(moke, signals, stop_event, saving_loc, experiment_parameters):
                     continue
                 signal_wanted = signal_measured.copy()
                 signal_wanted.iloc[:, :] = signal  # put constant signal at all times
-                error = hp.calibration.data2inst(signal_measured - signal_wanted).values
 
                 # Stop tuning for targeted signal if current signal is good enough, take images and save them
                 error_in_millitesla = (signal_measured - signal_wanted).values
+                #error_in_millitesla[:] = 0. # TODO remove
                 if np.mean(np.abs(error_in_millitesla)) < stop_criterion_tuning:
                     image_data = []
                     for j in range(nb_images_per_step):
                         image_data.append(camera_quanta.get_data().copy())
-                        #print(i,j)   # TODO remove
+                        #print(idx_step,j)   # TODO remove
                     image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate
                     current_signal_end_time = output_data.index[-1]
                     append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe'],
@@ -95,11 +95,15 @@ def take_steps(moke, signals, stop_event, saving_loc, experiment_parameters):
                     if only_save_average_of_images:
                         image_data = np.mean(image_data, axis=2)
                     nth_step_grp.create_dataset('image_data', data=image_data)
+                    data_callback(current_signal_end_time,
+                                  signal_measured.iloc[-1, :].values,
+                                  image_data)
                     last_signal_end_time = current_signal_end_time
                     break
 
-                correction = np.zeros(error.shape)
-                correction -= Kp * error
+                error_in_volts = hp.calibration.data2inst(signal_measured - signal_wanted).values
+                correction = np.zeros(error_in_volts.shape)
+                correction -= Kp * error_in_volts
                 # integral += error
                 # correction += Ki * integral
                 # derivative = error - previous_error

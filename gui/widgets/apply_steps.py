@@ -48,12 +48,19 @@ class ApplySteps(QWidget):
         self.setLayout(layout)
         self.resize(1200, 500)
 
+        plot = pg.PlotWidget()
+        dock = Dock('Hysteresis', widget=plot, closable=False)
+        self.dock_area.addDock(dock)
+
     def run_experiment(self):
         experiment_parameters = self.create_experiment_params_dict()
         signals = self.create_signal_from_parameters()
         self.tune_stop = threading.Event()
-        take_steps(self.moke, signals, self.tune_stop, self.saving_dir,
-                   experiment_parameters)
+
+        tuning_thread = threading.Thread(target=take_steps,
+                                         args=[self.moke, signals, self.tune_stop, self.saving_dir, experiment_parameters])
+        tuning_thread.daemon = True
+        tuning_thread.start()
 
     def stop_experiment(self):
         try:
@@ -101,7 +108,6 @@ class ApplySteps(QWidget):
             signals = np.loadtxt(path)
             assert signals.shape[1] == 3, 'Wrong signal in CSV file, must have 3 columns'
         else:
-            nb_cycles = self.params.child("Signal", "Predefined signals", "Number of repetitions").value()
             nb_steps = self.params.child("Signal", "Predefined signals", "Number of points per repetition").value()
             signal_types = {'sinus': lambda x: np.sin(x),
                             'triangle': lambda x: 2 / np.pi * np.arcsin(np.sin(x))}
@@ -126,12 +132,13 @@ class ApplySteps(QWidget):
                     amplitudes[2] * signal_generator(t + phases[2] + offsets[2])
                 ])
             seq = seq[:-1]
-            seq *= nb_cycles
             signals = np.array(seq)
         return signals
 
     def create_experiment_params_dict(self):
         expprms = dict()
+        expprms['n_loops'] = self.params.child("Running the experiment", "Number of repetitions").value()
+        expprms['degauss'] = self.params.child("Running the experiment", "deGauss").value()
         expprms['nb_images_per_step'] = self.params.child("Running the experiment", "Number images per step").value()
         expprms['only_save_average_of_images'] = self.params.child("Running the experiment", "Only save average of images").value()
         expprms['Kp'] = self.params.child("Running the experiment", "PID tuning", "Kp").value()
@@ -148,6 +155,7 @@ class ApplySteps(QWidget):
         else:
             return ''
 
+
 params_dict = [
     {
         "name": "Running the experiment",
@@ -156,6 +164,8 @@ params_dict = [
             {"name": "Saving dir", "type": "str", "value": ""},
             {"name": "Run", "type": "action"},
             {"name": "Stop", "type": "action"},
+            {"name": "Number of repetitions", "type": "int", "value": 2, "limits": [-1, 10 ** 100]},
+            {"name": "deGauss", "type": "bool", "value": True},
             {"name": "Number images per step", "type": "int", "value": 10, "limits": [1, 10**100]},
             {"name": "Only save average of images", "type": "bool", "value": True},
             {
@@ -178,7 +188,6 @@ params_dict = [
                 "name": "Predefined signals",
                 "type": "group",
                 "children": [
-                    {"name": "Number of repetitions", "type": "int", "value": 2, "limits": [1, 10 ** 100]},
                     {"name": "Number of points per repetition", "type": "int", "value": 60, "limits": [1, 10 ** 100]},
                     {"name": "Signal type", "type": "list", "limits": ["sinus", "triangle"], "value": "sinus"},
                     {
@@ -226,7 +235,6 @@ params_dict = [
         ],
     },
 ]
-
 
 
 if __name__ == '__main__':

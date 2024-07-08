@@ -18,11 +18,12 @@ class CameraControllerQuantalux:
             camera_list = self._sdk.discover_available_cameras()
             self.camera = self._sdk.open_camera(camera_list[0])
             # apply start conditions for camera
-            # NOTE set data_rate only supported for Quantalux not foir Kiralux
+            # NOTE set data_rate only supported for Quantalux not for Kiralux
             #self.camera.data_rate = DATA_RATE.FPS_30   # or DATA_RATE.FPS_50 to run faster but with more noise
             self.camera.frames_per_trigger_zero_for_unlimited = 0
             self.camera.image_poll_timeout_ms = 0
-            self.camera.roi = ROI(0, 0, self.camera.sensor_width_pixels, self.camera.sensor_height_pixels)
+            # do net reset roi when restarting camera
+            #self.camera.roi = ROI(0, 0, self.camera.sensor_width_pixels, self.camera.sensor_height_pixels)
             self.camera.arm(2)
             self.camera.issue_software_trigger()
         except:

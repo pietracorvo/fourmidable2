@@ -25,9 +25,6 @@ class ApplySteps(QWidget):
         self.setWindowTitle('Apply field steps experiment ')
         self.moke = moke
         self.stop_event = threading.Event()
-        # self.plotting_data = pd.DataFrame(columns=[
-        #     't', 'Bx', 'By', 'Bz', 'sum camera intensity'
-        # ])
         self.plotting_data = []
 
         # set the data folder, and make sure it exists
@@ -87,11 +84,11 @@ class ApplySteps(QWidget):
     def params_changed(self, param, changes):
         """Function called whenever one of the parameters is changed"""
         for param, change, data in changes:
+            # print(param, change, data, param.parent())
             if change == "value":
                 if param.name() == 'Saving dir':
                     self.saving_dir = data
-                if (param.name() == 'Field to plot' or
-                        param.name() == 'Data processing'):
+                if param.parent().name() == 'Plotting':
                     self.update_plot()
             elif change == "activated":
                 if param.name() == "Run":
@@ -165,22 +162,27 @@ class ApplySteps(QWidget):
         if len(data) == 0:
             return
         selected_field = self.params.child("Plotting", "Field to plot").value()
+        nb_steps = self.params.child("Signal", "Predefined signals", "Number of points per repetition").value()
+        len_data = len(data['sum camera intensity'])
+        remove_linear_drift = self.params.child("Plotting", "Remove global linear drift").value()
+        if remove_linear_drift:
+            try:
+                # take first point of every cycle for linear fit, excluding the first and current cycle
+                drift, _ = np.polyfit(range(nb_steps, len_data, nb_steps), data['sum camera intensity'][nb_steps::nb_steps], 1)
+                data['sum camera intensity'] -= drift * range(len_data)
+            except:
+                pass
+        try_faraday_compensation = self.params.child("Plotting", "TODO Try Faraday compensation").value()
+        if try_faraday_compensation:
+            # TODO currently not implemented
+            pass
         data_processing = self.params.child("Plotting", "Data processing").value()
         if data_processing == 'average loops':
-            nb_steps = self.params.child("Signal", "Predefined signals", "Number of points per repetition").value()
-            len_data = len(data['sum camera intensity'])
             fields = np.zeros(min(nb_steps, len(data)))
             intensities = np.zeros(min(nb_steps, len(data)))
-            for i in range(0, len_data, nb_steps):
-                for j in range(nb_steps):
-                    #print(i,j,len_data)
-                    if i+j < len_data:
-                        # just average intensities over one loop
-                        intensities[j] += data['sum camera intensity'][i+j]
-                        # and take fields from last loop
-                        fields[j] = data[selected_field][i+j]
-            intensities /= np.array([int(len_data/nb_steps+1)]*(len_data%nb_steps)
-                                    + [int(len_data/nb_steps)]*(nb_steps-len_data%nb_steps))[:len_data]
+            for i in range(nb_steps):
+                intensities[i] = np.mean(data['sum camera intensity'][i::nb_steps])
+                fields[i] = np.mean(data[selected_field][i::nb_steps])
         else:
             fields = data[selected_field]
             intensities = data['sum camera intensity']
@@ -281,8 +283,8 @@ params_dict = [
         "children": [
             {"name": "Field to plot", "type": "list", "limits": ["Bx", "By", "Bz"], "value": "Bx"},
             {"name": "Data processing", "type": "list", "limits": ["none", "average loops"], "value": "none"},
-            {'name': 'TODO Apply drift correction', 'type': 'bool', 'value': False},
-            {'name': 'TODO Compensate Faraday effect', 'type': 'bool', 'value': False},
+            {'name': 'Remove global linear drift', 'type': 'bool', 'value': False},
+            {'name': 'TODO Try Faraday compensation', 'type': 'bool', 'value': False},
         ],
     }
 ]

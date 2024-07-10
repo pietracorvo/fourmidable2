@@ -123,15 +123,9 @@ class MokeDocker(QWidget):
                 self.dockarea.addDock(d, 'right')
 
             elif "camera" in name:
-                view = pg.GraphicsView()
-                view.useOpenGL()
-                viewbox = pg.ViewBox()
-                viewbox.setAspectLocked(True)
-                plt = pg.ImageItem()
-                viewbox.addItem(plt)
-                view.setCentralItem(viewbox)
+                view = pg.GraphicsLayoutWidget()
                 self.dynamic_plots[name] = CameraPlotting(
-                    self.moke.instruments[name], plt=plt, view=viewbox)
+                    self.moke.instruments[name], view=view)
                 d = Dock(name, widget=view, closable=True)
                 d.sigClosed.connect(partial(self.dock_closed, name))
                 self.dock_dict.update({name: d})

@@ -274,56 +274,75 @@ class WollastonPlotting(NIPlotting):
 
 
 class CameraPlotting(InstrumentPlotting):
-    def __init__(self, device, plt=None, view=None, crosshair=True):
+    def __init__(self, device, view=None, crosshair=True):
         self.device = device
 
         if view is None:
-            self.view = pg.GraphicsView()
-            self.view.setAspectLocked(True)
+            self.view = pg.GraphicsLayoutWidget()
         else:
             self.view = view
-        if plt is None:
-            self.plt = pg.ImageItem(border='w')
-            self.view.addItem(self.plt)
+        self.plot1 = self.view.addPlot(row=0, col=0)
+        self.plot1.setAspectLocked(True)
+        self.plot1.hideAxis('bottom')
+        self.plot1.hideAxis('left')
+        self.image = pg.ImageItem()
+        self.plot1.addItem(self.image)
+        self.plot2 = self.view.addPlot(row=1, col=0)
+        self.plot2.setLogMode(False, True)
+        self.plot2.hide()
 
-        InstrumentPlotting.__init__(self, device, plt)
+        InstrumentPlotting.__init__(self, device, self.image)
 
         if crosshair:
-            self.vLine = pg.InfiniteLine(angle=90, movable=False, pen='k')
-            self.hLine = pg.InfiniteLine(angle=0, movable=False, pen='k')
-            self.view.addItem(self.vLine, ignoreBounds=True)
-            self.view.addItem(self.hLine, ignoreBounds=True)
+            self.vLine = pg.InfiniteLine(angle=0, movable=False, pen='k')
+            self.hLine = pg.InfiniteLine(angle=90, movable=False, pen='k')
+            self.plot1.addItem(self.vLine)
+            self.plot1.addItem(self.hLine)
         self.first_plot = True
         self.crosshair = crosshair
 
-        # if the camera is from instruments/camera_quantalux.py add also an extra panel with control buttons
-        if hasattr(device, 'camera'):
-            # TODO when moving camera dock i get an error
-            label_framerate = QtWidgets.QLabel()
-            def update_framerate():
-                if isinstance(device.current_framerate, float):
-                    label_framerate.setText(str(round(device.current_framerate, 3)))
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(update_framerate)
-            self.timer.start(100)
-            layout_input = QtWidgets.QGridLayout()
-            layout_input.addWidget(QtWidgets.QLabel('Frames Per Second'), 1, 1)
-            layout_input.addWidget(label_framerate, 1, 2)
-            layout_container = QtWidgets.QWidget()
-            layout_container.setLayout(layout_input)
-            self.view.scene().addWidget(layout_container)
+        # TODO maybe give it an own plotting thread, long exposure times makes gui laggy
+        self.label_framerate = QtWidgets.QLabel()
+        layout_input = QtWidgets.QGridLayout()
+        self.button = QtWidgets.QPushButton('Histogram')
+        self.button.setCheckable(True)
+        self.button.clicked.connect(self.button_hide_show_histogram)
+        layout_input.addWidget(QtWidgets.QLabel('Frames Per Second'), 1, 1)
+        layout_input.addWidget(self.label_framerate, 1, 2)
+        layout_input.addWidget(self.button, 2, 1)
+        layout_container = QtWidgets.QWidget()
+        layout_container.setLayout(layout_input)
+        self.view.scene().addWidget(layout_container)
 
+    def button_hide_show_histogram(self):
+        if self.button.isChecked():
+            self.plot2.show()
+        else:
+            self.plot2.hide()
+
+    def update_framerate(self):
+        try:
+            if isinstance(self.device.current_framerate, float):
+                self.label_framerate.setText(str(round(self.device.current_framerate, 3)))
+        except:
+            pass
 
     def get_plot_data(self):
-        return self.device.get_data()
+        img = self.device.get_data()
+        self.update_framerate()
+        return img
 
     def plot(self):
-        data = np.rot90(self.get_plot_data(), k=3).astype(np.uint8)
+        self.first_plot = False
+        data = self.get_plot_data()
         if self.crosshair:
             self.vLine.setPos(data.shape[0] / 2)
             self.hLine.setPos(data.shape[1] / 2)
-        self.plt.setImage(data, autoDownsample=False)
-        self.first_plot = False
+        self.image.setImage(data, axisOrder='row-major', autoDownsample=False,
+                            border=(169,169,169))
+        hist, bins = np.histogram(data.flatten(), bins='auto')
+        self.plot2.plot(bins[:-1], hist, clear=True)
+        self.plot2.setTitle(f'<h3>Mean   {round(np.mean(data),1)}<br>Median {np.median(data)}<h3>')
 
 
 class MokePlotting(InstrumentPlotting):

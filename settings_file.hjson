@@ -86,9 +86,9 @@
 			"port_type": "AI",
 			"controller": "NIcard1",
 			"ports": {
-				"Dev1/ai0": "hallprobe_A",
-	            "Dev1/ai2": "hallprobe_B",
-	            "Dev1/ai4": "hallprobe_C"
+				"Dev1/ai0": "field_X",
+	            "Dev1/ai2": "field_Y",
+	            "Dev1/ai4": "field_Z"
 			},
             /* TODO Used during calibration, remove later
 			"calibration": {
@@ -167,9 +167,9 @@
                     'scale': 0.1,
                     # 5Volts is middle position of nanocube
                     'offset': [5, 5, 5]
+
                 }
             }
-            # TODO currently axes labels hard coded in NanoCube class
 		},
 		"quanta_camera": {
 			"type": "CameraQuantalux",

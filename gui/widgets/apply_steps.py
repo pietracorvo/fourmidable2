@@ -60,7 +60,6 @@ class ApplySteps(QWidget):
         experiment_parameters = self.create_experiment_params_dict()
         signals = self.create_signal_from_parameters()
         self.tune_stop = threading.Event()
-
         tuning_thread = threading.Thread(target=take_steps,
                                          args=[self.moke, signals, self.tune_stop,
                                                self.saving_dir, self.update_plot_data,
@@ -148,6 +147,7 @@ class ApplySteps(QWidget):
         expprms['Kp'] = self.params.child("Running the experiment", "PID tuning", "Kp").value()
         expprms['nb_points_used_for_tuning'] = self.params.child("Running the experiment", "PID tuning", "Number points for tuning").value()
         expprms['stop_criterion_tuning_mT'] = self.params.child("Running the experiment", "PID tuning", "Mean error HP stop criterion").value()
+        expprms['skip_loops'] = self.params.child("Running the experiment", "skip loops").value()
         return expprms
 
     def update_plot_data(self, t, fields, image):
@@ -209,6 +209,7 @@ params_dict = [
             {"name": "Stop", "type": "action"},
             {"name": "Number of repetitions", "type": "int", "value": -1, "limits": [-1, 10 ** 100]},
             {"name": "deGauss", "type": "bool", "value": True},
+            {"name": "Skip loops", "type": "int", "value": 0, "limits": [0, 10 ** 100]},
             {"name": "Number images per step", "type": "int", "value": 5, "limits": [1, 10**100]},
             {"name": "Only save average of images", "type": "bool", "value": True},
             {

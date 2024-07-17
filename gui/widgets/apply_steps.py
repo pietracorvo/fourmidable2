@@ -147,7 +147,7 @@ class ApplySteps(QWidget):
         expprms['Kp'] = self.params.child("Running the experiment", "PID tuning", "Kp").value()
         expprms['nb_points_used_for_tuning'] = self.params.child("Running the experiment", "PID tuning", "Number points for tuning").value()
         expprms['stop_criterion_tuning_mT'] = self.params.child("Running the experiment", "PID tuning", "Mean error HP stop criterion").value()
-        expprms['skip_loops'] = self.params.child("Running the experiment", "skip loops").value()
+        expprms['skip_loops'] = self.params.child("Running the experiment", "Skip loops").value()
         return expprms
 
     def update_plot_data(self, t, fields, image):
@@ -168,7 +168,8 @@ class ApplySteps(QWidget):
         if remove_linear_drift:
             try:
                 # take first point of every cycle for linear fit, excluding the first and current cycle
-                drift, _ = np.polyfit(range(nb_steps, len_data, nb_steps), data['sum camera intensity'][nb_steps::nb_steps], 1)
+                # TODO start at zero now with skip_loops implemented
+                drift, _ = np.polyfit(range(0, len_data, nb_steps), data['sum camera intensity'][0::nb_steps], 1)
                 data['sum camera intensity'] -= drift * range(len_data)
             except:
                 pass

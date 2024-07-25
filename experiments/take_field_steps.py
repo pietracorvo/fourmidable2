@@ -31,6 +31,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
     hp = moke.instruments['hallprobe']
     hexapole = moke.instruments['hexapole']
     camera_quanta = moke.instruments['quanta_camera']
+    experiment_parameters['exposure_time_ms_quantalux'] = camera_quanta.exposure_time_ms
 
     degauss = experiment_parameters['degauss']
     n_loops = experiment_parameters['n_loops']
@@ -47,6 +48,16 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
     if degauss:
         deGauss(moke)
+
+    # make a reference image with no field applied
+    image_data = []
+    for j in range(nb_images_per_step):
+        image_data.append(camera_quanta.get_data().copy())
+        # print(idx_loop, idx_step, j)
+    image_data = np.stack(image_data, axis=2)
+    if only_save_average_of_images:
+        image_data = np.mean(image_data, axis=2)
+    info_grp.create_dataset('reference_image_no_field', data=image_data)
 
     start_time = hexapole.get_data(start_time=0, end_time=-1).index[-1]
     last_signal_end_time = start_time

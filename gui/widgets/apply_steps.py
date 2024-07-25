@@ -168,7 +168,6 @@ class ApplySteps(QWidget):
         if remove_linear_drift:
             try:
                 # take first point of every cycle for linear fit, excluding the first and current cycle
-                # TODO start at zero now with skip_loops implemented
                 drift, _ = np.polyfit(range(0, len_data, nb_steps), data['sum camera intensity'][0::nb_steps], 1)
                 data['sum camera intensity'] -= drift * range(len_data)
             except:
@@ -208,10 +207,10 @@ params_dict = [
             {"name": "Saving dir", "type": "str", "value": ""},
             {"name": "Run", "type": "action"},
             {"name": "Stop", "type": "action"},
-            {"name": "Number of repetitions", "type": "int", "value": -1, "limits": [-1, 10 ** 100]},
+            {"name": "Number of repetitions", "type": "int", "value": 4, "limits": [-1, 10 ** 100]},
             {"name": "deGauss", "type": "bool", "value": True},
-            {"name": "Skip loops", "type": "int", "value": 0, "limits": [0, 10 ** 100]},
-            {"name": "Number images per step", "type": "int", "value": 5, "limits": [1, 10**100]},
+            {"name": "Skip loops", "type": "int", "value": 1, "limits": [0, 10 ** 100]},
+            {"name": "Number images per step", "type": "int", "value": 10, "limits": [1, 10**100]},
             {"name": "Only save average of images", "type": "bool", "value": True},
             {
                 "name": "PID tuning",

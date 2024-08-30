@@ -10,6 +10,7 @@ class CameraQuantalux(Instrument):
         self.camera = controller.camera
         self._time_last_frame_sent = time()
         self._last_framerate_measured = None
+        # self.exposure_time_ms = 1500
 
     @property
     def current_framerate(self):
@@ -38,8 +39,6 @@ class CameraQuantalux(Instrument):
     @exposure_time_ms.setter
     def exposure_time_ms(self, val):
         self.camera.exposure_time_us = int(val*1000)
-
-
 
     def get_data(self):
         while True:

@@ -303,12 +303,13 @@ class LoopWidget(QWidget):
     def update_plot(self):
         try:
             self.plotting_data_lock.acquire()
-            for name, p in self.plots.items():
-                params = self.plotting_parameters.plots[name]
-                p.setLabel('bottom', params['x'])
-                p.setLabel('left', params['y'])
-                p.plot(np.array(self.plotting_data[params['x']]),
-                       np.array(self.plotting_data[params['y']]), clear=True, pen=PENS[0])
+            # TODO here loop experiment gives error on Forumidable
+            # for name, p in self.plots.items():
+            #     params = self.plotting_parameters.plots[name]
+            #     p.setLabel('bottom', params['x'])
+            #     p.setLabel('left', params['y'])
+            #     p.plot(np.array(self.plotting_data[params['x']]),
+            #            np.array(self.plotting_data[params['y']]), clear=True, pen=PENS[0])
             self.plotting_data_lock.release()
         except:
             traceback.print_exc()
@@ -495,7 +496,8 @@ class PlottingParameters(pTypes.GroupParameter):
             else:
                 self.averaging = False
         else:
-            self.plots[path[1]][path[2]] = data
+            # TODO here loop experiment gives error on Forumidable
+            # self.plots[path[1]][path[2]] = data
             self.sigParametersChanged.emit()
 
 

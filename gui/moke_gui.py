@@ -94,6 +94,7 @@ class ApplicationWindow(QMainWindow):
             #"camera1": True,
             #"camera2": True,
             "quanta_camera": True,
+            "hamamatsu_camera": True,
             "3D_fields": False,
             "console": False,
             "hallprobe": True,

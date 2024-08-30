@@ -12,6 +12,7 @@
 from .ni import *
 from .ni_rtsi import *
 from .camera import *
+from .camera_hamamatsu import *
 from .camera_quantalux import *
 #from .pi import *
 #from .smaract_control import *

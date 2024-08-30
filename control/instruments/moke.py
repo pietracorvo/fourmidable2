@@ -11,6 +11,7 @@ from data.signal_generation import get_zeros_signal
 #from experiments.basic import zero_magnet, switch_laser
 from experiments.basic import zero_magnet
 import numpy as np
+import time
 
 # this is for tracing prints, sometimes useful
 # import sys
@@ -52,6 +53,7 @@ class Moke(Instrument):
             self.instruments["reference"].stage_data(
                 lambda x: np.zeros(len(x)), 1, autostart=True)
             print('NI card started')
+            #time.sleep(1)
             # start the laser
             # CODE MODIFIED
             #switch_laser(self, True)

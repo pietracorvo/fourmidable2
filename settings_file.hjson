@@ -78,6 +78,11 @@
 			"type": "CameraControllerQuantalux",
 			"name": "CameraControllerQuantalux1",
 			"parameters": {}
+		},
+		{
+			"type": "CameraControllerHamamatsu",
+			"name": "CameraControllerHamamatsu1",
+			"parameters": {}
 		}
 	],
 	"instruments": {
@@ -175,6 +180,10 @@
 			"type": "CameraQuantalux",
 			"controller": "CameraControllerQuantalux1"
 		},
+		"hamamatsu_camera": {
+			"type": "CameraHamamatsu",
+			"controller": "CameraControllerHamamatsu1"
+		},
 		# NOTE only needed for experiments\calibration\RL_circuit_testing.py
 		"v_measurement": {
 		    "type": "NIinst",
@@ -221,4 +230,3 @@
 		}
 	}
 }
-

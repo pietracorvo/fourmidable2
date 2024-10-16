@@ -10,7 +10,12 @@ class CameraHamamatsu(Instrument):
         self._time_last_frame_sent = time()
         self._last_framerate_measured = None
         self.exposure_time_ms = 3
-        print(self.exposure_time_ms)
+        self.start_acquisition()
+
+
+    def start_acquisition(self):
+        self.camera.setup_acquisition(mode='sequence', nframes=1)
+        self.camera.start_acquisition()
 
     @property
     def current_framerate(self):
@@ -18,7 +23,8 @@ class CameraHamamatsu(Instrument):
 
     @property
     def exposure_time_range_ms(self):
-        return [e*0.001 for e in self.camera.exposure_time_range_us]
+        exp_attri = self.camera.get_attribute("exposure_time")
+        return [1000 * exp_attri.min, 1000 * exp_attri.max]
 
     @property
     def exposure_time_ms(self):
@@ -42,6 +48,16 @@ class CameraHamamatsu(Instrument):
         self.camera.set_attribute_value("EXPOSURE TIME", val/1000)
 
     def get_data(self):
+        while True:
+            frame = self.camera.read_newest_image()
+            if frame is not None:
+                self.last_frame = frame
+                self._update_framerate()
+                return frame
+            else:
+                return self.last_frame
+
+    def get_single_image(self):
         while True:
             frame = self.camera.grab(1)
             if frame is not None:

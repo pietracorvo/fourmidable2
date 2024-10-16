@@ -14,7 +14,7 @@ import pyqtgraph as pg
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from experiments.basic import zero_magnet
-from experiments.take_field_steps import take_steps
+from experiments.take_field_steps_hamamatsu import take_steps
 import threading
 
 
@@ -22,7 +22,7 @@ class ApplySteps(QWidget):
 
     def __init__(self, moke, data_folder=''):
         super().__init__()
-        self.setWindowTitle('Apply field steps experiment ')
+        self.setWindowTitle('Kerr microscope - field steps experiment ')
         self.moke = moke
         self.stop_event = threading.Event()
         self.plotting_data = []

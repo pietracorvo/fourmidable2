@@ -18,7 +18,7 @@ import display.instrument_plotting as instrument_plotting
 from gui.widgets import moke_docker, movement, experiment_selection, skm_window, \
     loop_widget, stage_properties, find_centre, eucentric_protocol, move_buttons, apply_field, \
     apply_custom_field, find_max_signal, laser_button, hp_calibration, \
-    apply_steps, camera_quantalux_settings
+    fmoke_steps, microscope_steps, microscope_imaging, camera_quantalux_settings, camera_hamamatsu_settings
 from control.instruments import NIinst
 from control.instruments.moke import Moke
 from gui.widgets.canvas import DynamicInstrumentPlot
@@ -87,21 +87,15 @@ class ApplicationWindow(QMainWindow):
         self.available_docks = {key: False for key, value in self.moke.instruments.items(
         ) if isinstance(value, NIinst)}
         self.available_docks.update({
-            #"wollaston1_composite": True,
-            #"wollaston2_composite": False,
-            #"wollaston1_fft": False,
-            #"wollaston2_fft": False,
-            #"camera1": True,
-            #"camera2": True,
-            "quanta_camera": True,
-            "hamamatsu_camera": True,
+            "quanta_camera": False,
+            "hamamatsu_camera": False,
             "3D_fields": False,
             "console": False,
             "hallprobe": True,
             "temperature": False,
-            "hexapole": True,
-            #"v_measurement": True
+            "hexapole": True
         })
+
         # try loading docks setup from the settings, fall back to default it it fails
         try:
             if "docks" in self.settings_data and self.available_docks.keys() == self.settings_data["docks"].keys():
@@ -112,6 +106,7 @@ class ApplicationWindow(QMainWindow):
         # add the dock actions in the view toolbar
         self.view_menu_actions = dict()
         for k, is_open in self.available_docks.items():
+            # print(k, is_open)
             action = QAction(k, self, checkable=True)
             action.setChecked(is_open)
             action.triggered.connect(partial(self.toggle_view, k))
@@ -121,29 +116,34 @@ class ApplicationWindow(QMainWindow):
         # add menu containing experiments
         self.experiments_menu = QMenu('&Experiments', self)
         self.menuBar().addSeparator()
+        # Create Menu option called Experiments
         self.menuBar().addMenu(self.experiments_menu)
 
-        self.experiments_menu.addAction('&SKM', self.start_skm)
-        self.skm_window = None
-
-        self.experiments_menu.addAction('&Loop', self.start_loop)
-        self.loop_window = None
-
-        self.experiments_menu.addAction(
-            "&Find Woll Max Signal", self.find_max_signal)
-        self.find_max_signal_window = None
-
+        # Add "Constant Field Option"
         self.experiments_menu.addAction(
             '&Apply Constant Field', self.start_apply_field)
         self.apply_field_window = None
 
+        # Add "Constant Field Option"
+        # TODO: Revisit PID and Feedback
         self.experiments_menu.addAction(
             '&Apply Custom Field', self.start_apply_custom_field)
         self.apply_custom_field_window = None
 
+        # Add Fourier Moke Experiment
         self.experiments_menu.addAction(
-            '&Apply Field Steps', self.start_apply_steps)
-        self.apply_steps_window = None
+            '&Hysteresis Loops - Fourier Moke', self.start_fmoke_steps)
+        self.fmoke_steps_window = None
+
+        # Add Kerr Microscopy Measurement
+        self.experiments_menu.addAction(
+            '&Hysteresis Loops - Kerr Microscopy', self.start_microscope_steps)
+        self.microscope_steps_window = None
+
+        # Add Static Kerr Microscopy Imaging Measurement
+        self.experiments_menu.addAction(
+            '&Kerr Microscopy Imaging', self.start_microscope_imaging)
+        self.microscope_imaging_window = None
 
         # add the calibration menu
         self.calibration_menu = QMenu('&Calibration', self)
@@ -182,8 +182,12 @@ class ApplicationWindow(QMainWindow):
 
         # button to open camera settings
         self.camera_settings_window = None
-        self.button_open_camera_settings = QPushButton('Open camera settings')
+        self.button_open_camera_settings = QPushButton('Open Quanta settings')
         self.button_open_camera_settings.clicked.connect(self.open_camera_settings)
+
+        self.cameraham_settings_window = None
+        self.button_open_cameraham_settings = QPushButton('Open Hamamatsu settings')
+        self.button_open_cameraham_settings.clicked.connect(self.open_camerahamamatsu_settings)
 
         # create movement control widget
         stage = moke.instruments['stage']
@@ -211,6 +215,7 @@ class ApplicationWindow(QMainWindow):
         vlayout = QVBoxLayout()
         #vlayout.addWidget(self.laser_button)
         vlayout.addWidget(self.button_open_camera_settings)
+        vlayout.addWidget(self.button_open_cameraham_settings)
         vlayout.addWidget(self.movement_control)
         vlayout.addWidget(self.move_buttons)
 
@@ -226,14 +231,7 @@ class ApplicationWindow(QMainWindow):
 
         self.showMaximized()
 
-    def start_skm(self):
-        self.skm_window = skm_window.SkmWidget(self.moke)
-        self.skm_window.show()
 
-    def start_loop(self):
-        self.loop_window = loop_widget.LoopWidget(
-            self.moke, data_folder=self.data_folder)
-        self.loop_window.show()
 
     def start_apply_field(self):
         self.apply_field_window = apply_field.ApplyField(self.moke)
@@ -244,14 +242,29 @@ class ApplicationWindow(QMainWindow):
             self.moke)
         self.apply_custom_field_window.show()
 
-    def start_apply_steps(self):
-        self.apply_steps_window = apply_steps.ApplySteps(
+    def start_fmoke_steps(self):
+        self.fmoke_steps_window = fmoke_steps.ApplySteps(
             self.moke, data_folder=self.data_folder)
-        self.apply_steps_window.show()
+        self.fmoke_steps_window.show()
+
+    def start_microscope_steps(self):
+        self.microscope_steps_window = microscope_steps.ApplySteps(
+            self.moke, data_folder=self.data_folder)
+        self.microscope_steps_window.show()
+
+    def start_microscope_imaging(self):
+        # Give self as an argument to be used inside Imaging Widget
+        self.microscope_imaging_window = microscope_imaging.ImagingWidget(
+            self, data_folder=self.data_folder)
+        self.microscope_imaging_window.show()
 
     def open_camera_settings(self):
         self.camera_settings_window = camera_quantalux_settings.CameraQuantaluxSettings(self.moke)
         self.camera_settings_window.show()
+
+    def open_camerahamamatsu_settings(self):
+        self.cameraham_settings_window = camera_hamamatsu_settings.CameraHamamatsuSettings(self.moke)
+        self.cameraham_settings_window.show()
 
     def stage_properties(self):
         self.stage_properties_window = stage_properties.StageProperties(
@@ -341,11 +354,15 @@ class ApplicationWindow(QMainWindow):
         except:
             pass
         try:
-            self.apply_steps_window.close()
+            self.fmoke_steps_window.close()
         except:
             pass
         try:
             self.camera_settings_window.close()
+        except:
+            pass
+        try:
+            self.cameraham_settings_window.close()
         except:
             pass
         try:

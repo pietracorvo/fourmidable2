@@ -3,11 +3,12 @@ import pyqtgraph as pg
 from scipy.fftpack.helper import next_fast_len
 import data.live_processing as processing
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtGui import QIcon
 import traceback
 import pandas as pd
 from control.calibration import NIoffsetScale, HPSampleCalib
-
-import time
+from PyQt5.QtWidgets import *
+import pyqtgraph as pg
 
 COLORS = [(31, 119, 180), (255, 127, 14), (44, 160, 44), (214, 39, 40), (148, 103, 189), (140, 86, 75), (227, 119, 194),
           (127, 127, 127), (188, 189, 34), (23, 190, 207)]
@@ -271,6 +272,236 @@ class WollastonPlotting(NIPlotting):
                                       np.array(self.plotting_data[l]))
             clear = False
         self.first_run = False
+
+class CameraLivePlotting(InstrumentPlotting):
+    def __init__(self, device, view=None, crosshair=True):
+        self.device = device
+
+        if view is None:
+            self.view = pg.GraphicsLayoutWidget()
+        else:
+            self.view = view
+        self.plot1 = self.view.addPlot(row=0, col=0)
+        self.plot1.setAspectLocked(True)
+        self.plot1.hideAxis('bottom')
+        self.plot1.hideAxis('left')
+        self.image = pg.ImageItem()
+        self.plot1.addItem(self.image)
+        self.plot2 = self.view.addPlot(row=1, col=0)
+        self.plot2.setLogMode(False, True)
+        self.plot2.hide()
+
+        InstrumentPlotting.__init__(self, device, self.image)
+
+        if crosshair:
+            self.vLine = pg.InfiniteLine(angle=0, movable=False, pen='k')
+            self.hLine = pg.InfiniteLine(angle=90, movable=False, pen='k')
+            self.plot1.addItem(self.vLine)
+            self.plot1.addItem(self.hLine)
+        self.first_plot = True
+        self.crosshair = crosshair
+
+        # Create the menu layout with buttons
+        self.create_menu()
+
+    def create_menu(self):
+        """Creates the menu layout with buttons for the histogram and camera settings."""
+        self.menu_widget = QWidget()
+        self.menu_layout = QVBoxLayout()
+
+        # Button to show/hide the histogram
+        self.histogram_button = QPushButton()
+        icon_path = r"C:\Users\3DStation4\PycharmProjects\pythonProject_3DMOKE_new\gui\widgets\icons\hist.png"
+        self.histogram_button.setIcon(QIcon(icon_path))
+        self.histogram_button.setCheckable(True)
+        self.histogram_button.clicked.connect(self.button_hide_show_histogram)
+        self.menu_layout.addWidget(self.histogram_button)
+
+        # Button for camera settings (functionality can be extended later)
+        self.settings_button = QPushButton()
+        icon_path2 = r"C:\Users\3DStation4\PycharmProjects\pythonProject_3DMOKE_new\gui\widgets\icons\clock.png"
+        self.settings_button.setIcon(QIcon(icon_path2))
+        self.settings_button.clicked.connect(self.open_camera_settings)
+        self.menu_layout.addWidget(self.settings_button)
+
+        # Add a stretch to push buttons to the top
+        self.menu_layout.addStretch(1)
+
+        # Set the layout to the menu widget
+        self.menu_widget.setLayout(self.menu_layout)
+
+    def button_hide_show_histogram(self):
+        """Toggle the visibility of the histogram plot."""
+        if self.histogram_button.isChecked():
+            self.plot2.show()
+        else:
+            self.plot2.hide()
+
+    def open_camera_settings(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+    def get_menu_widget(self):
+        """Returns the menu widget to be added to the layout."""
+        return self.menu_widget
+
+    def button_hide_show_histogram(self):
+        if self.histogram_button.isChecked():
+            self.plot2.show()
+        else:
+            self.plot2.hide()
+
+    def update_framerate(self):
+        try:
+            if isinstance(self.device.current_framerate, float):
+                self.label_framerate.setText(str(round(self.device.current_framerate, 3)))
+        except:
+            pass
+
+    def get_plot_data(self):
+        img = self.device.get_data()
+        self.update_framerate()
+        return img
+
+    def plot(self):
+        self.first_plot = False
+        data = self.get_plot_data()
+        if self.crosshair:
+            self.vLine.setPos(data.shape[0] / 2)
+            self.hLine.setPos(data.shape[1] / 2)
+        self.image.setImage(data, axisOrder='row-major', autoDownsample=False,
+                            border=(169,169,169))
+        hist, bins = np.histogram(data.flatten(), bins='auto')
+        self.plot2.plot(bins[:-1], hist, clear=True)
+        self.plot2.setTitle(f'<h3>Mean   {round(np.mean(data),1)}<br>Median {np.median(data)}<h3>')
+
+class CameraStaticPlotting(InstrumentPlotting):
+    def __init__(self, device, view=None, crosshair=True):
+        self.device = device
+
+        if view is None:
+            self.view = pg.GraphicsLayoutWidget()
+        else:
+            self.view = view
+        self.plot1 = self.view.addPlot(row=0, col=0)
+        self.plot1.setAspectLocked(True)
+        self.plot1.hideAxis('bottom')
+        self.plot1.hideAxis('left')
+        self.image = pg.ImageItem()
+        self.plot1.addItem(self.image)
+        self.plot2 = self.view.addPlot(row=1, col=0)
+        self.plot2.setLogMode(False, True)
+        self.plot2.hide()
+
+        InstrumentPlotting.__init__(self, device, self.image)
+
+        if crosshair:
+            self.vLine = pg.InfiniteLine(angle=0, movable=False, pen='k')
+            self.hLine = pg.InfiniteLine(angle=90, movable=False, pen='k')
+            self.plot1.addItem(self.vLine)
+            self.plot1.addItem(self.hLine)
+        self.first_plot = True
+        self.crosshair = crosshair
+
+        # Create the menu layout with buttons
+        self.create_menu()
+
+    def create_menu(self):
+        """Creates the menu layout with buttons for the histogram and camera settings."""
+        self.menu_widget = QWidget()
+        self.menu_layout = QVBoxLayout()
+
+        # Button to show/hide the histogram
+        self.photo_button = QPushButton()
+        self.photo_button.setIcon(QIcon(r"C:\Users\3DStation4\PycharmProjects\pythonProject_3DMOKE_new\gui\widgets\icons\photo.png"))
+        # self.photo_button.clicked.connect(self.button_take_photo)
+        self.menu_layout.addWidget(self.photo_button)
+
+        # Button for camera settings (functionality can be extended later)
+        self.save_button = QPushButton()
+        self.save_button.setIcon(QIcon(r"C:\Users\3DStation4\PycharmProjects\pythonProject_3DMOKE_new\gui\widgets\icons\save.png"))
+        self.save_button.clicked.connect(self.button_save_photo)
+        self.menu_layout.addWidget(self.save_button)
+
+        # Button for camera settings (functionality can be extended later)
+        self.video_button = QPushButton()
+        self.video_button.setIcon(QIcon(r"C:\Users\3DStation4\PycharmProjects\pythonProject_3DMOKE_new\gui\widgets\icons\video.png"))
+        self.video_button.clicked.connect(self.button_save_video)
+        self.menu_layout.addWidget(self.video_button)
+
+        # Button for camera settings (functionality can be extended later)
+        self.upload_image = QPushButton()
+        self.upload_image.setIcon(QIcon(r"C:\Users\3DStation4\PycharmProjects\pythonProject_3DMOKE_new\gui\widgets\icons\upload.png"))
+        self.upload_image.clicked.connect(self.button_upload_image)
+        self.menu_layout.addWidget(self.upload_image)
+
+        # Add a stretch to push buttons to the top
+        self.menu_layout.addStretch(1)
+
+        # Set the layout to the menu widget
+        self.menu_widget.setLayout(self.menu_layout)
+
+
+    def button_take_photo(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+    def button_save_photo(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+    def button_save_video(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+    def button_upload_image(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+
+    def button_take_photo(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+    def button_take_photo(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+    def get_menu_widget(self):
+        """Returns the menu widget to be added to the layout."""
+        return self.menu_widget
+
+
+
+    def button_hide_show_histogram(self):
+        if self.button.isChecked():
+            self.plot2.show()
+        else:
+            self.plot2.hide()
+
+    def update_framerate(self):
+        try:
+            if isinstance(self.device.current_framerate, float):
+                self.label_framerate.setText(str(round(self.device.current_framerate, 3)))
+        except:
+            pass
+
+    def get_plot_data(self):
+        img = self.device.get_data()
+        self.update_framerate()
+        return img
+
+    def plot(self):
+        self.first_plot = False
+        data = self.get_plot_data()
+        if self.crosshair:
+            self.vLine.setPos(data.shape[0] / 2)
+            self.hLine.setPos(data.shape[1] / 2)
+        self.image.setImage(data, axisOrder='row-major', autoDownsample=False,
+                            border=(169,169,169))
+        hist, bins = np.histogram(data.flatten(), bins='auto')
+        self.plot2.plot(bins[:-1], hist, clear=True)
+        self.plot2.setTitle(f'<h3>Mean   {round(np.mean(data),1)}<br>Median {np.median(data)}<h3>')
 
 
 class CameraPlotting(InstrumentPlotting):

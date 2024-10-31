@@ -48,17 +48,18 @@ class CameraHamamatsu(Instrument):
         self.camera.set_attribute_value("EXPOSURE TIME", val/1000)
 
     def get_data(self):
-        # TODO ALI
-        while True:
-            frame = self.camera.read_newest_image()
-            if frame is not None:
-                self.last_frame = frame
-                self._update_framerate()
-                return frame
-            else:
-                return self.last_frame
+        """Used for the display camera image plot widget,
+        does NOT BLOCK until new image acquired, just returns last image. """
+        frame = self.camera.read_newest_image()
+        if frame is not None:
+            self.last_frame = frame
+            self._update_framerate()
+            return frame
+        else:
+            return self.last_frame
 
     def get_single_image(self):
+        """Used in experiment, BLOCKS until a new image is acquired."""
         while True:
             frame = self.camera.grab(1)
             if frame is not None:

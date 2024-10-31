@@ -52,7 +52,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
     # make a reference image with no field applied
     image_data = []
     for j in range(nb_images_per_step):
-        image_data.append(camera_quanta.get_data().copy())
+        image_data.append(camera_quanta.get_single_image().copy())
         # print(idx_loop, idx_step, j)
     image_data = np.stack(image_data, axis=2)
     if only_save_average_of_images:
@@ -94,7 +94,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                         break
                     image_data = []
                     for j in range(nb_images_per_step):
-                        image_data.append(camera_quanta.get_data().copy())
+                        image_data.append(camera_quanta.get_single_image().copy())
                         #print(idx_loop, idx_step, j)
                     image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate
                     current_signal_end_time = output_data.index[-1]

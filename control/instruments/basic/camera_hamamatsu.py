@@ -48,6 +48,7 @@ class CameraHamamatsu(Instrument):
         self.camera.set_attribute_value("EXPOSURE TIME", val/1000)
 
     def get_data(self):
+        # TODO ALI
         while True:
             frame = self.camera.read_newest_image()
             if frame is not None:

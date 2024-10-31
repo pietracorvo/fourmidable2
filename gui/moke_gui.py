@@ -18,7 +18,7 @@ import display.instrument_plotting as instrument_plotting
 from gui.widgets import moke_docker, movement, experiment_selection, skm_window, \
     loop_widget, stage_properties, find_centre, eucentric_protocol, move_buttons, apply_field, \
     apply_custom_field, find_max_signal, laser_button, hp_calibration, \
-    fmoke_steps, microscope_steps, microscope_imaging, camera_quantalux_settings, camera_hamamatsu_settings
+    fmoke_steps, microscope_steps, microscopy_analysis, microscope_imaging, camera_quantalux_settings, camera_hamamatsu_settings
 from control.instruments import NIinst
 from control.instruments.moke import Moke
 from gui.widgets.canvas import DynamicInstrumentPlot
@@ -145,6 +145,17 @@ class ApplicationWindow(QMainWindow):
             '&Kerr Microscopy Imaging', self.start_microscope_imaging)
         self.microscope_imaging_window = None
 
+        # Add analysis menu
+        self.analysis_menu = QMenu('&Analysis', self)
+        self.menuBar().addSeparator()
+        # Create Menu option called Experiments
+        self.menuBar().addMenu(self.analysis_menu)
+
+        self.analysis_menu.addAction(
+            '&MOKE Microscopy', self.start_microscopy_analysis)
+        self.microscopy_analysis_window = None
+
+
         # add the calibration menu
         self.calibration_menu = QMenu('&Calibration', self)
         self.menuBar().addSeparator()
@@ -246,6 +257,10 @@ class ApplicationWindow(QMainWindow):
         self.fmoke_steps_window = fmoke_steps.ApplySteps(
             self.moke, data_folder=self.data_folder)
         self.fmoke_steps_window.show()
+
+    def start_microscopy_analysis(self):
+        self.microscopy_analysis_window = microscopy_analysis.analysis_start()
+        self.microscopy_analysis_window.show()
 
     def start_microscope_steps(self):
         self.microscope_steps_window = microscope_steps.ApplySteps(

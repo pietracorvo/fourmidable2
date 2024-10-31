@@ -9,6 +9,8 @@ import pandas as pd
 from control.calibration import NIoffsetScale, HPSampleCalib
 from PyQt5.QtWidgets import *
 import pyqtgraph as pg
+from gui.widgets.background_substraction_live import BackgroundSubstractionLive
+
 
 COLORS = [(31, 119, 180), (255, 127, 14), (44, 160, 44), (214, 39, 40), (148, 103, 189), (140, 86, 75), (227, 119, 194),
           (127, 127, 127), (188, 189, 34), (23, 190, 207)]
@@ -274,8 +276,9 @@ class WollastonPlotting(NIPlotting):
         self.first_run = False
 
 class CameraLivePlotting(InstrumentPlotting):
-    def __init__(self, device, view=None, crosshair=True):
-        self.device = device
+    def __init__(self, moke, view=None, crosshair=True):
+        self.moke = moke
+        self.device = self.moke.instruments['hamamatsu_camera']
 
         if view is None:
             self.view = pg.GraphicsLayoutWidget()
@@ -291,7 +294,7 @@ class CameraLivePlotting(InstrumentPlotting):
         self.plot2.setLogMode(False, True)
         self.plot2.hide()
 
-        InstrumentPlotting.__init__(self, device, self.image)
+        InstrumentPlotting.__init__(self, self.device, self.image)
 
         if crosshair:
             self.vLine = pg.InfiniteLine(angle=0, movable=False, pen='k')
@@ -324,6 +327,14 @@ class CameraLivePlotting(InstrumentPlotting):
         self.settings_button.clicked.connect(self.open_camera_settings)
         self.menu_layout.addWidget(self.settings_button)
 
+        # Button for Background Substraction
+        self.background_button = QPushButton()
+        icon_path3 = r"C:\Users\3DStation4\PycharmProjects\pythonProject_3DMOKE_new\gui\widgets\icons\background.png"
+        self.background_button.setIcon(QIcon(icon_path3))
+        self.background_button.clicked.connect(self.open_background_substraction)
+        self.menu_layout.addWidget(self.background_button)
+        self.background_substraction_window = None
+
         # Add a stretch to push buttons to the top
         self.menu_layout.addStretch(1)
 
@@ -340,6 +351,13 @@ class CameraLivePlotting(InstrumentPlotting):
     def open_camera_settings(self):
         """Opens camera settings (placeholder, extend functionality as needed)."""
         QMessageBox.information(self.view, "Camera Settings", "Camera settings dialog placeholder")
+
+    def open_background_substraction(self):
+        """Opens camera settings (placeholder, extend functionality as needed)."""
+        self.background_substraction_window = BackgroundSubstractionLive(self.moke)
+        self.background_substraction_window.show()
+
+
 
     def get_menu_widget(self):
         """Returns the menu widget to be added to the layout."""

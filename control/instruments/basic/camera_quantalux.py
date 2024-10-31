@@ -41,14 +41,14 @@ class CameraQuantalux(Instrument):
         self.camera.exposure_time_us = int(val*1000)
 
     def get_data(self):
-        while True:
-            frame = self.camera.get_pending_frame_or_null()
-            if frame is not None:
-                self.last_frame = frame.image_buffer
-                self._update_framerate()
-                return frame.image_buffer
-            else:
-                return self.last_frame
+        #while True:   # TODO ALI
+        frame = self.camera.get_pending_frame_or_null()
+        if frame is not None:
+            self.last_frame = frame.image_buffer
+            self._update_framerate()
+            return frame.image_buffer
+        else:
+            return self.last_frame
 
     def set_roi(self, upperleft_x, upperleft_y, lowerright_x, lowerright_y):
         # NOTE I have to disarm when changing roi

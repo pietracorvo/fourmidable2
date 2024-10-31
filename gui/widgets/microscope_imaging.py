@@ -23,7 +23,7 @@ class ImagingWidget(QWidget):
         self.moke.instruments[self.name].start_acquisition()
 
         # Live camera plot (left)
-        self.liveview = CameraLivePlotting(self.moke.instruments[self.name], view=self.live_view)
+        self.liveview = CameraLivePlotting(self.moke, view=self.live_view)
 
         # Last frame plot (right)
         self.last_frame_viewer = CameraStaticPlotting(self.moke.instruments[self.name], view=self.last_frame_view)

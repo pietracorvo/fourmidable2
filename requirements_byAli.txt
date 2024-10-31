@@ -28,3 +28,6 @@ jupyter
 #   unzip it, locate the thorlabs_tsi_camera_python_sdk_package.zip and install it via pip
 #   After that move the files in Native_64_lib to the folder thorlabs_camera_DLLs
 thorlabs_camera_DLLs\thorlabs_tsi_camera_python_sdk_package.zip
+
+# 5) added by Miguel, Le and Sabri
+pylablib==1.4.3

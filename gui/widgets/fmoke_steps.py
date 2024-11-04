@@ -148,6 +148,7 @@ class ApplySteps(QWidget):
         expprms['nb_points_used_for_tuning'] = self.params.child("Running the experiment", "PID tuning", "Number points for tuning").value()
         expprms['stop_criterion_tuning_mT'] = self.params.child("Running the experiment", "PID tuning", "Mean error HP stop criterion").value()
         expprms['skip_loops'] = self.params.child("Running the experiment", "Skip loops").value()
+        expprms['take_reference_image'] = self.params.child("Running the experiment", "Take reference image before applying fields").value()
         return expprms
 
     def update_plot_data(self, t, fields, image):
@@ -207,10 +208,11 @@ params_dict = [
             {"name": "Saving dir", "type": "str", "value": ""},
             {"name": "Run", "type": "action"},
             {"name": "Stop", "type": "action"},
-            {"name": "Number of repetitions", "type": "int", "value": 4, "limits": [-1, 10 ** 100]},
+            {"name": "Take reference image before applying fields", "type": "bool", "value": True},
+            {"name": "Number of repetitions", "type": "int", "value": 5, "limits": [-1, 10 ** 100]},
             {"name": "deGauss", "type": "bool", "value": True},
-            {"name": "Skip loops", "type": "int", "value": 1, "limits": [0, 10 ** 100]},
-            {"name": "Number images per step", "type": "int", "value": 10, "limits": [1, 10**100]},
+            {"name": "Skip loops", "type": "int", "value": 0, "limits": [0, 10 ** 100]},
+            {"name": "Number images per step", "type": "int", "value": 3, "limits": [1, 10**100]},
             {"name": "Only save average of images", "type": "bool", "value": True},
             {
                 "name": "PID tuning",
@@ -232,7 +234,7 @@ params_dict = [
                 "name": "Predefined signals",
                 "type": "group",
                 "children": [
-                    {"name": "Number of points per repetition", "type": "int", "value": 50, "limits": [1, 10 ** 100]},
+                    {"name": "Number of points per repetition", "type": "int", "value": 40, "limits": [1, 10 ** 100]},
                     {"name": "Signal type", "type": "list", "limits": ["triangle", "sinus"], "value": "triangle"},
                     {
                         "name": "Amplitudes",

@@ -50,6 +50,9 @@ class CameraQuantaluxSettings(QWidget):
         self.update_binning_values_in_gui()
 
         layout_1 = QGridLayout()
+        layout_1.addWidget(QLabel('<span style="font-weight:600; color:#aa0000;">'
+                                  'Apllying big ROI changes and binning may crash the program!</span>'
+                                  '<br>(You can also use the ThorCam software to change theses settings)'))
         layout_1.addWidget(QLabel('Exposure time [ms]'), 1, 1)
         layout_1.addWidget(self.input_exposuretime, 1, 2)
         layout_2 = QGridLayout()

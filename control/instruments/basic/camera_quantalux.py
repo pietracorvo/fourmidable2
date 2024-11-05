@@ -10,7 +10,8 @@ class CameraQuantalux(Instrument):
         self.camera = controller.camera
         self._time_last_frame_sent = time()
         self._last_framerate_measured = None
-        # self.exposure_time_ms = 1500
+        self.last_frame = None   # gets initialized in next line
+        _ = self.get_single_image()
 
     @property
     def current_framerate(self):
@@ -57,6 +58,7 @@ class CameraQuantalux(Instrument):
             frame = self.camera.get_pending_frame_or_null()
             if frame is not None:
                 self._update_framerate()
+                self.last_frame = frame.image_buffer
                 return frame.image_buffer
 
     def set_roi(self, upperleft_x, upperleft_y, lowerright_x, lowerright_y):

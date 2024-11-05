@@ -233,7 +233,7 @@ params_dict = [
                         'name': 'saved to HDF in "info"',
                         'type': 'text',
                         'value': '',
-                        'tip': 'bla Multiline text input field'
+                        'tip': 'Multiline string saved to HDF in "info"'
                     },
                 ]
             },

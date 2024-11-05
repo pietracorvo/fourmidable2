@@ -148,6 +148,9 @@ class ApplySteps(QWidget):
         expprms['nb_points_used_for_tuning'] = self.params.child("Running the experiment", "PID tuning", "Number points for tuning").value()
         expprms['stop_criterion_tuning_mT'] = self.params.child("Running the experiment", "PID tuning", "Mean error HP stop criterion").value()
         expprms['skip_loops'] = self.params.child("Running the experiment", "Skip loops").value()
+        expprms['take_reference_image'] = self.params.child("Running the experiment", "Take reference image before applying fields").value()
+        expprms['notes_saved_to_hdf'] = self.params.child("Running the experiment", "NOTES", 'saved to HDF in "info"').value()
+
         return expprms
 
     def update_plot_data(self, t, fields, image):
@@ -207,6 +210,7 @@ params_dict = [
             {"name": "Saving dir", "type": "str", "value": ""},
             {"name": "Run", "type": "action"},
             {"name": "Stop", "type": "action"},
+            {"name": "Take reference image before applying fields", "type": "bool", "value": True},
             {"name": "Number of repetitions", "type": "int", "value": 4, "limits": [-1, 10 ** 100]},
             {"name": "deGauss", "type": "bool", "value": True},
             {"name": "Skip loops", "type": "int", "value": 1, "limits": [0, 10 ** 100]},
@@ -221,6 +225,19 @@ params_dict = [
                     {"name": "Number points for tuning", "type": "int", "value": 1000},
                     {"name": "Mean error HP stop criterion", "type": "float", "suffix": "mT", "value": 0.05, "step": 0.01},
                 ],
+            },
+            {
+                'name': 'NOTES',
+                'type': 'group',
+                'expanded': False,
+                'children': [
+                    {
+                        'name': 'saved to HDF in "info"',
+                        'type': 'text',
+                        'value': '',
+                        'tip': 'Multiline string saved to HDF in "info"'
+                    },
+                ]
             },
         ],
     },

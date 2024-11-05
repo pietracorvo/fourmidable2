@@ -1,8 +1,8 @@
 import sys
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 #from PyQt5.QtWidgets import QSizePolicy
-import numpy as np
+from time import sleep
+
 
 
 class CameraQuantaluxSettings(QWidget):
@@ -50,9 +50,6 @@ class CameraQuantaluxSettings(QWidget):
         self.update_binning_values_in_gui()
 
         layout_1 = QGridLayout()
-        layout_1.addWidget(QLabel('<span style="font-weight:600; color:#aa0000;">'
-                                  'Apllying big ROI changes and binning may crash the program!</span>'
-                                  '<br>(You can also use the ThorCam software to change theses settings)'))
         layout_1.addWidget(QLabel('Exposure time [ms]'), 1, 1)
         layout_1.addWidget(self.input_exposuretime, 1, 2)
         layout_2 = QGridLayout()
@@ -71,6 +68,9 @@ class CameraQuantaluxSettings(QWidget):
         layout_3.addWidget(self.input_biny, 2, 2)
 
         main_layout = QVBoxLayout()
+        layout_0 = QGridLayout()
+        layout_0.addWidget(QLabel('NOTE You can also use the ThorCam\nsoftware to change theses settings') ,1, 1)
+        main_layout.addLayout(layout_0)
         main_layout.addLayout(layout_1)
         main_layout.addLayout(layout_2)
         main_layout.addWidget(self.button_apply_roi)
@@ -99,6 +99,7 @@ class CameraQuantaluxSettings(QWidget):
             self.input_roiorgx.value() + self.input_roiwidth.value(),
             self.input_roiorgy.value() + self.input_roiheight.value(),
         )
+        sleep(0.2)
         self.update_roi_values_in_gui()
 
     def update_binning_values_in_gui(self):
@@ -108,14 +109,14 @@ class CameraQuantaluxSettings(QWidget):
 
     def change_camera_binning(self):
         self.cam.set_binning((self.input_binx.value(), self.input_biny.value()))
+        sleep(0.2)
         self.update_binning_values_in_gui()
 
     def remove_roi(self):
         self.cam.reset_roi_if_roi_selected()
+        sleep(0.2)
         self.update_roi_values_in_gui()
 
-    def change_binning(self):
-        pass
 
 
 if __name__ == '__main__':

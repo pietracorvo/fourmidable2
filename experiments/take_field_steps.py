@@ -123,22 +123,24 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     last_pid_results[i] = output_data.iloc[-1,:].values
                     if print_all_info: print('    --> updated last_pid_results\n\t\t', last_pid_results)
 
-                    # TODO ALI - maybe do this different with incremental PID
+                    # If skip curretn loop, record NO data
                     if idx_loop < skip_loops:
                        break
 
+                    # Take nb images for averaging
                     image_data = []
                     for j in range(nb_images_per_step):
                         image_data.append(camera_quanta.get_single_image().copy())
                         if print_all_info: print(f'    --> take picture number {j}')
                     if print_all_info: print('    --> all pictures taken')
-                    image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate
+                    image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate (like h5 format does)
+
+                    # Save all the stuff to HDF
+                    # TODO ALI - this is not the current_signal_end_time BUT the time_all_images_were_taken
                     current_signal_end_time = output_data.index[-1]
                     append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe'],
                                      start_time=last_signal_end_time, end_time=current_signal_end_time)
                     nth_step_grp = step_grp.create_group(str(idx_step))
-                    # TODO is the following really the time_signal_stability_reached???
-                    #      and also add times all_photos_have_been_taken
                     nth_step_grp.attrs['time_signal_stability_reached'] = current_signal_end_time
                     nth_step_grp.attrs['target_signal'] = signal
                     nth_step_grp.attrs['hp_measured_signal'] = signal_measured.iloc[-1, :].values
@@ -152,6 +154,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     if print_all_info: print('    --> data written to HDF')
                     break
 
+                # If signal stability not reached, try a new PID step
                 if print_all_info: print('    --> run PID: take difference signal_measured - signal_wanted and correct')
                 error_in_volts = hp.calibration.data2inst(signal_measured - signal_wanted).values
                 correction = np.zeros(error_in_volts.shape)

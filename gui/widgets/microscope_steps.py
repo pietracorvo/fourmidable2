@@ -140,7 +140,7 @@ class ApplySteps(QWidget):
 
     def create_experiment_params_dict(self):
         expprms = dict()
-        expprms['n_loops'] = self.params.child("Running the experiment", "Number of repetitions").value()
+        expprms['nb_loops'] = self.params.child("Running the experiment", "Number of repetitions").value()
         expprms['degauss'] = self.params.child("Running the experiment", "deGauss").value()
         expprms['nb_images_per_step'] = self.params.child("Running the experiment", "Number images per step").value()
         expprms['only_save_average_of_images'] = self.params.child("Running the experiment", "Only save average of images").value()

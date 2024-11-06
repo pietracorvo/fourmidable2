@@ -36,7 +36,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
     take_reference_image = experiment_parameters['take_reference_image']
     degauss = experiment_parameters['degauss']
-    n_loops = experiment_parameters['n_loops']
+    nb_loops = experiment_parameters['nb_loops']
     skip_loops = experiment_parameters['skip_loops']
     nb_images_per_step = experiment_parameters['nb_images_per_step']
     only_save_average_of_images = experiment_parameters['only_save_average_of_images']
@@ -71,7 +71,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
     idx_loop = 0
     idx_step = 0
-    while idx_loop < n_loops or n_loops == -1:
+    while idx_loop < nb_loops or nb_loops == -1:
 
         for i, signal in enumerate(signals):
             # previous_error = np.zeros((nb_points_used_for_tuning, 3))   # NOTE used for ID PID
@@ -136,7 +136,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate (like h5 format does)
 
                     # Save all the stuff to HDF
-                    # TODO ALI - this is not the current_signal_end_time BUT the time_all_images_were_taken
+                    # TODO ALI - this is not really the current_signal_end_time BUT the time_all_images_were_taken
                     current_signal_end_time = output_data.index[-1]
                     append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe'],
                                      start_time=last_signal_end_time, end_time=current_signal_end_time)
@@ -144,6 +144,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     nth_step_grp.attrs['time_signal_stability_reached'] = current_signal_end_time
                     nth_step_grp.attrs['target_signal'] = signal
                     nth_step_grp.attrs['hp_measured_signal'] = signal_measured.iloc[-1, :].values
+
                     if only_save_average_of_images:
                         image_data = np.mean(image_data, axis=2)
                     nth_step_grp.create_dataset('image_data', data=image_data)

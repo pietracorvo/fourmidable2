@@ -35,7 +35,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
     take_reference_image = experiment_parameters['take_reference_image']
     degauss = experiment_parameters['degauss']
-    n_loops = experiment_parameters['n_loops']
+    nb_loops = experiment_parameters['nb_loops']
     skip_loops = experiment_parameters['skip_loops']
     nb_images_per_step = experiment_parameters['nb_images_per_step']
     only_save_average_of_images = experiment_parameters['only_save_average_of_images']
@@ -67,7 +67,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
     idx_loop = 0
     idx_step = 0
-    while idx_loop < n_loops or n_loops == -1:
+    while idx_loop < nb_loops or nb_loops == -1:
         for i, signal in enumerate(signals):
             # previous_error = np.zeros((nb_points_used_for_tuning, 3))
             # integral = np.zeros((nb_points_used_for_tuning, 3))

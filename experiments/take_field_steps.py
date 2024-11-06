@@ -123,7 +123,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     last_pid_results[i] = output_data.iloc[-1,:].values
                     if print_all_info: print('    --> updated last_pid_results\n\t\t', last_pid_results)
 
-                    # If skip curretn loop, record NO data
+                    # If skip current loop, record NO data
                     if idx_loop < skip_loops:
                        break
 

@@ -234,7 +234,7 @@ def ni_read(task, data_acquisition_period, shutdown, data_sender, feedback_sende
         feedback_senders: a list of tuples where the first entry is the list of ports and the second
         the writer pipe through which to send the feedback data
     """
-    rate = int(np.array(task.fsamp))
+    rate = int(np.array(task.fsamp.magnitude))
     last_time = -1 / rate
     try:
         while not shutdown.is_set():
@@ -348,7 +348,7 @@ def ni_write(output, task, reader, index_reset, output_refresh_samples, shutdown
     start_index = {port: value + n_samps for port,
                    value in start_index.items()}
     try:
-        rate = int(np.array(task.fsamp))
+        rate = int(np.array(task.fsamp.magnitude))
         # start the first output
         task.write(out, autostart=False)
         task.start()

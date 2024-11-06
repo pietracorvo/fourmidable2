@@ -136,22 +136,24 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate (like h5 format does)
 
                     # Save all the stuff to HDF
-                    # TODO ALI - this is not really the current_signal_end_time BUT the time_all_images_were_taken
-                    current_signal_end_time = output_data.index[-1]
+                    current_signal_stabilized_time = output_data.index[-1]
+                    time_all_images_were_taken = hexapole.get_data(start_time=-3, end_time=-1).index[-1]
                     append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe'],
-                                     start_time=last_signal_end_time, end_time=current_signal_end_time)
+                                     start_time=last_signal_end_time, end_time=current_signal_stabilized_time)
                     nth_step_grp = step_grp.create_group(str(idx_step))
-                    nth_step_grp.attrs['time_signal_stability_reached'] = current_signal_end_time
+                    nth_step_grp.attrs['time_signal_stability_reached'] = current_signal_stabilized_time
                     nth_step_grp.attrs['target_signal'] = signal
                     nth_step_grp.attrs['hp_measured_signal'] = signal_measured.iloc[-1, :].values
-
+                    nth_step_grp.attrs['time_all_images_were_taken'] = time_all_images_were_taken
                     if only_save_average_of_images:
                         image_data = np.mean(image_data, axis=2)
                     nth_step_grp.create_dataset('image_data', data=image_data)
-                    data_callback(current_signal_end_time,
+                    data_callback(current_signal_stabilized_time,
                                   signal_measured.iloc[-1, :].values,
                                   image_data)
-                    last_signal_end_time = current_signal_end_time
+                    time_all_data_saved_to_hdf = hexapole.get_data(start_time=-3, end_time=-1).index[-1]
+                    nth_step_grp.attrs['time_all_data_saved_to_hdf'] = time_all_data_saved_to_hdf
+                    last_signal_end_time = current_signal_stabilized_time
                     if print_all_info: print('    --> data written to HDF')
                     break
 

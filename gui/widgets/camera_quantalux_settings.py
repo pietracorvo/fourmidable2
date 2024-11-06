@@ -69,7 +69,9 @@ class CameraQuantaluxSettings(QWidget):
 
         main_layout = QVBoxLayout()
         layout_0 = QGridLayout()
-        layout_0.addWidget(QLabel('NOTE You can also use the ThorCam\nsoftware to change theses settings\n(Only disconnecting the camera resets its parameters)\n\n') ,1, 1)
+        info_text = QLabel('NOTE You can also use the ThorCam software to change these settings.\n(Only disconnecting the camera resets its parameters to factory defaults.)\n')
+        info_text.setWordWrap(True)
+        layout_0.addWidget(info_text, 1, 1)
         main_layout.addLayout(layout_0)
         main_layout.addLayout(layout_1)
         main_layout.addLayout(layout_2)

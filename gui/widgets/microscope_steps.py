@@ -149,7 +149,7 @@ class ApplySteps(QWidget):
         expprms['stop_criterion_tuning_mT'] = self.params.child("Running the experiment", "PID tuning", "Mean error HP stop criterion").value()
         expprms['skip_loops'] = self.params.child("Running the experiment", "Skip loops").value()
         expprms['take_reference_image'] = self.params.child("Running the experiment", "Take reference image before applying fields").value()
-        expprms['notes_saved_to_hdf'] = self.params.child("Running the experiment", "NOTES", 'saved to HDF in "info"').value()
+        expprms['notes_saved_to_hdf'] = self.params.child("NOTES", 'saved to HDF in "info"').value()
 
         return expprms
 
@@ -226,20 +226,20 @@ params_dict = [
                     {"name": "Mean error HP stop criterion", "type": "float", "suffix": "mT", "value": 0.05, "step": 0.01},
                 ],
             },
-            {
-                'name': 'NOTES',
-                'type': 'group',
-                'expanded': False,
-                'children': [
-                    {
-                        'name': 'saved to HDF in "info"',
-                        'type': 'text',
-                        'value': '',
-                        'tip': 'Multiline string saved to HDF in "info"'
-                    },
-                ]
-            },
         ],
+    },
+    {
+        'name': 'NOTES',
+        'type': 'group',
+        'expanded': False,
+        'children': [
+            {
+                'name': 'saved to HDF in "info"',
+                'type': 'text',
+                'value': '',
+                'tip': 'Multiline string saved to HDF in "info"'
+            },
+        ]
     },
     {
         "name": "Signal",

@@ -392,7 +392,7 @@ class ApplicationWindow(QMainWindow):
 
     def about(self):
         QMessageBox.about(self, "About",
-                          """This program is written and maintained by Luka Skoric. For any questions and problems, please contact me on ls604@cam.ac.uk"""
+                          """This program has been written by Luka Skoric (ls604@cam.ac.uk) and adapted by Alexander Rabensteiner (pietracorvo@hotmail.com) and Miguel A. Cascales Sandoval. For any questions and problems, please contact on of them."""
                           )
 
 

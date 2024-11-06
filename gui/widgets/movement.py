@@ -45,9 +45,10 @@ class MovementControl(QWidget):
         input_box = QGroupBox("Position")
 
         # add move relative tick box
-        self.relative_tick = QCheckBox("&Relative", self)
+        self.relative_tick = QCheckBox("&Relative\n(NOT IMPLEMENTED)", self)
         self.relative_tick.setChecked(False)
         self.relative_tick.stateChanged.connect(self.relative_tick_ticked)
+        self.relative_tick.setCheckable(False)   # NOTE Alexander - I have never tested this code and what the realtive button does, so for now I just set it uncheckable
 
         # add x, y and z input fields
         position_label = dict()

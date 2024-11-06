@@ -157,24 +157,24 @@ class ApplicationWindow(QMainWindow):
 
 
         # add the calibration menu
-        self.calibration_menu = QMenu('&Calibration', self)
+        self.calibration_menu = QMenu('&Calibration - NOT WORKING legacy code from Luka', self)
         self.menuBar().addSeparator()
         self.menuBar().addMenu(self.calibration_menu)
 
         self.calibration_menu.addAction(
-            '&Hallprobe calibration', self.hallprobe_calibration)
+            '&Hallprobe calibration - NOT WORKING', self.hallprobe_calibration)
         self.hallprobe_calibration_window = None
 
         self.calibration_menu.addAction(
-            '&Stage properties', self.stage_properties)
+            '&Stage properties - NOT WORKING', self.stage_properties)
         self.stage_properties_window = None
 
         self.calibration_menu.addAction(
-            '&Find centre', self.find_centre)
+            '&Find centre - NOT WORKING', self.find_centre)
         self.find_centre_window = None
 
         self.calibration_menu.addAction(
-            '&Eucentric protocol', self.start_eucentric_protocol)
+            '&Eucentric protocol - NOT WORKING', self.start_eucentric_protocol)
         self.eucentric_protocol_window = None
 
         self.help_menu = QMenu('&Help', self)

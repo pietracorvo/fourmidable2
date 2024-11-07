@@ -29,11 +29,16 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
     inst_grp = grp.create_group('data')
     step_grp = inst_grp.create_group('steps')
 
+    # Hardware specific info to save to HDF
     hp = moke.instruments['hallprobe']
     hexapole = moke.instruments['hexapole']
     camera_quanta = moke.instruments['quanta_camera']
-    experiment_parameters['exposure_time_ms_quantalux'] = camera_quanta.exposure_time_ms
-
+    experiment_parameters['quantalux_exposure_time_ms'] = camera_quanta.exposure_time_ms
+    experiment_parameters['quantalux_sensor_width_height'] = (camera_quanta.sensor_width_pixels, camera_quanta.sensor_height_pixels)
+    experiment_parameters['quantalux_sensor_binningx_binningy'] = camera_quanta.binning
+    experiment_parameters['quantalux_hotpixelcorrection_active'] = {'is_active': camera_quanta.is_hotpixelcorrection_active,
+                                                                    'threshold': camera_quanta.get_hotpixelcorrection_threshold}
+    # Experiment specific parameters
     take_reference_image = experiment_parameters['take_reference_image']
     degauss = experiment_parameters['degauss']
     nb_loops = experiment_parameters['nb_loops']

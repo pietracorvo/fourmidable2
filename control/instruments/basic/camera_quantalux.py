@@ -41,6 +41,14 @@ class CameraQuantalux(Instrument):
     def exposure_time_ms(self, val):
         self.camera.exposure_time_us = int(val*1000)
 
+    @property
+    def is_hotpixelcorrection_active(self):
+        return self.camera.is_hot_pixel_correction_enabled
+
+    @property
+    def get_hotpixelcorrection_threshold(self):
+        return self.camera.hot_pixel_correction_threshold
+
     def get_data(self):
         """Used for the display camera image plot widget.
         Does not block until new image acquired, just returns last image."""

@@ -36,8 +36,10 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
     experiment_parameters['quantalux_exposure_time_ms'] = camera_quanta.exposure_time_ms
     experiment_parameters['quantalux_sensor_width_height'] = (camera_quanta.sensor_width_pixels, camera_quanta.sensor_height_pixels)
     experiment_parameters['quantalux_sensor_binningx_binningy'] = camera_quanta.binning
-    experiment_parameters['quantalux_hotpixelcorrection_active'] = {'is_active': camera_quanta.is_hotpixelcorrection_active,
-                                                                    'threshold': camera_quanta.get_hotpixelcorrection_threshold}
+    experiment_parameters['quantalux_hotpixelcorrection_isactive'] = camera_quanta.is_hotpixelcorrection_active
+    if experiment_parameters['quantalux_hotpixelcorrection_isactive']:
+        experiment_parameters['quantalux_hotpixelcorrection_threshold'] = camera_quanta.get_hotpixelcorrection_threshold
+
     # Experiment specific parameters
     take_reference_image = experiment_parameters['take_reference_image']
     degauss = experiment_parameters['degauss']
@@ -51,6 +53,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
     nb_points_used_for_tuning = experiment_parameters['nb_points_used_for_tuning']   # 1 point should equal 0.0001s
     stop_criterion_tuning = experiment_parameters['stop_criterion_tuning_mT']  # noise less than X mT
     for k, v in experiment_parameters.items():
+        #print(k,v)
         info_grp.attrs[k] = v
 
     if degauss:

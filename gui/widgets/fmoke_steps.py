@@ -209,10 +209,10 @@ params_dict = [
             {"name": "Run", "type": "action"},
             {"name": "Stop", "type": "action"},
             {"name": "Take reference image before applying fields", "type": "bool", "value": True},
-            {"name": "Number of repetitions", "type": "int", "value": 5, "limits": [-1, 10 ** 100]},
+            {"name": "Number of repetitions", "type": "int", "value": 25, "limits": [-1, 10 ** 100]},
             {"name": "deGauss", "type": "bool", "value": True},
-            {"name": "Skip loops", "type": "int", "value": 0, "limits": [0, 10 ** 100]},
-            {"name": "Number images per step", "type": "int", "value": 3, "limits": [1, 10**100]},
+            {"name": "Skip loops", "type": "int", "value": 5, "limits": [0, 10 ** 100]},
+            {"name": "Number images per step", "type": "int", "value": 5, "limits": [1, 10**100]},
             {"name": "Only save average of images", "type": "bool", "value": True},
             {
                 "name": "PID tuning",

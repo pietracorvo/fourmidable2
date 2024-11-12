@@ -31,6 +31,12 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
     # Hardware specific info to save to HDF
     hp = moke.instruments['hallprobe']
+    # TODO Ali implement fallback to HallProbe if senis not attached, currently it takes a not working senis if not attached
+    senis = moke.instruments['bighall_fields']
+    if experiment_parameters['measure_field_with_sensor'] == 'Senis':
+        magnetic_field_sensor = senis
+    else:
+        magnetic_field_sensor = hp
     hexapole = moke.instruments['hexapole']
     camera_quanta = moke.instruments['quanta_camera']
     experiment_parameters['quantalux_exposure_time_ms'] = camera_quanta.exposure_time_ms
@@ -113,7 +119,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
                 # Just get the last nb_points_used_for_tuning of hexapole & hp for PID
                 if print_all_info: print('    --> trying to get last output_data from hexapole')
-                signal_measured = hp.get_data(start_time=last_signal_end_time,
+                signal_measured = magnetic_field_sensor.get_data(start_time=last_signal_end_time,
                                               end_time=-1).iloc[-nb_points_used_for_tuning:, :]
                 output_data = hexapole.get_data(start_time=last_signal_end_time,
                                                 end_time=-1).iloc[-nb_points_used_for_tuning:, :]
@@ -146,7 +152,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     # Save all the stuff to HDF
                     current_signal_stabilized_time = output_data.index[-1]
                     time_all_images_were_taken = hexapole.get_data(start_time=-3, end_time=-1).index[-1]
-                    append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe'],
+                    append_save_instruments(moke, inst_grp, ['hexapole', 'hallprobe', 'bighall_fields'],
                                      start_time=last_signal_end_time, end_time=current_signal_stabilized_time)
                     nth_step_grp = step_grp.create_group(str(idx_step))
                     nth_step_grp.attrs['time_signal_stability_reached'] = current_signal_stabilized_time

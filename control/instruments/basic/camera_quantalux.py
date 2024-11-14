@@ -41,12 +41,12 @@ class CameraQuantalux(Instrument):
     def exposure_time_ms(self, val):
         self.camera.exposure_time_us = int(val*1000)
 
-    @property
-    def is_hotpixelcorrection_active(self):
-        return self.camera.is_hot_pixel_correction_enabled
+    #@property
+    #def is_hotpixelcorrection_active(self):
+    #    return self.camera.is_hot_pixel_correction_enabled
 
     @property
-    def get_hotpixelcorrection_threshold(self):
+    def hotpixelcorrection_threshold(self):
         return self.camera.hot_pixel_correction_threshold
 
     def get_data(self):
@@ -82,6 +82,15 @@ class CameraQuantalux(Instrument):
         self.camera.biny = binning_tuple[1]
         self.camera.arm(2)
         self.camera.issue_software_trigger()
+
+    def set_hotpixelcorrection(self, hotpixelcorrection_threshold):
+        # if correction is not enabled, you have to stop the camera, enable it and restart
+        if not self.camera.is_hot_pixel_correction_enabled:
+            self.camera.disarm()
+            self.camera.is_hot_pixel_correction_enabled = True   # enable hotpixelcorrection
+            self.camera.arm(2)
+            self.camera.issue_software_trigger()
+        self.camera.hot_pixel_correction_threshold = hotpixelcorrection_threshold
 
     def get_roi(self):
         return self.camera.roi

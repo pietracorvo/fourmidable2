@@ -86,3 +86,4 @@ if __name__ == "__main__":
 
     with Moke() as moke:
         calibrate_hallprobe(moke, plot=True)
+        print('!!! NOTABENE !!!\nAfter HP recalibration you might need to tweak the PID parameter "Mean error HP stop criterion"')

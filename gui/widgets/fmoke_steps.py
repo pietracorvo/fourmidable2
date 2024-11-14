@@ -226,7 +226,7 @@ params_dict = [
                     {"name": "Measure field with", "type": "list", "limits": ["HallProbe", "Senis"], "value": "HallProbe"},
                     {"name": "Kp", "type": "float", "value": 0.5, "step": 0.1},
                     {"name": "Number points for tuning", "type": "int", "value": 1000},
-                    {"name": "Mean error HP stop criterion", "type": "float", "suffix": "mT", "value": 0.05, "step": 0.01},
+                    {"name": "Mean error HP stop criterion", "type": "float", "suffix": "mT", "value": 0.06, "step": 0.01},
                 ],
             },
         ],

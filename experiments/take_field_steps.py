@@ -47,6 +47,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
         experiment_parameters['quantalux_hotpixelcorrection_threshold'] = camera_quanta.get_hotpixelcorrection_threshold
 
     # Experiment specific parameters
+    apply_pid_iteratively = False
     take_reference_image = experiment_parameters['take_reference_image']
     degauss = experiment_parameters['degauss']
     nb_loops = experiment_parameters['nb_loops']
@@ -88,13 +89,13 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
     while idx_loop < nb_loops or nb_loops == -1:
 
         for i, signal in enumerate(signals):
-            # previous_error = np.zeros((nb_points_used_for_tuning, 3))   # NOTE used for ID PID
+            # previous_error = np.zeros((nb_points_used_for_tuning, 3))   # NOTE for not used ID parts in PID
             # integral = np.zeros((nb_points_used_for_tuning, 3))
 
             counter_while_loop = -1
             while True:
                 counter_while_loop += 1
-                if print_all_info: print(f'LOOP TUNING  ---->  loop={idx_loop}', f'step={i}', f'trials_adjust_field_loop={counter_while_loop}')
+                if print_all_info: print(f'LOOP TUNING  ---->  loop={idx_loop}', f'step={i} trials_adjust_field_loop={counter_while_loop}')
 
                 # if stop event is set stop the experiment
                 if stop_event.is_set():
@@ -103,7 +104,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
                 # If voltage guesses already present from last PID iteration, try them on
                 # hexapole first (BUT only once!), before running the PID from guesses
-                if last_pid_results[i] is not None and counter_while_loop == 0:
+                if apply_pid_iteratively and last_pid_results[i] is not None and counter_while_loop == 0:
                     if print_all_info: print('    --> Try last loops PID result ')
                     guess_signal = np.array([
                         lambda x: last_pid_results[i][0] * np.ones(len(x)),
@@ -139,7 +140,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
 
                     # If skip current loop, record NO data
                     if idx_loop < skip_loops:
-                       break
+                        break
 
                     # Take nb images for averaging
                     image_data = []
@@ -147,7 +148,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                         image_data.append(camera_quanta.get_single_image().copy())
                         if print_all_info: print(f'    --> take picture number {j}')
                     if print_all_info: print('    --> all pictures taken')
-                    image_data = np.stack(image_data, axis=2)   # stack images along 3rd coordinate (like h5 format does)
+                    image_data = np.stack(image_data, axis=2)  # stack images along 3rd coordinate (like h5 format does)
 
                     # Save all the stuff to HDF
                     current_signal_stabilized_time = output_data.index[-1]
@@ -159,12 +160,11 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     nth_step_grp.attrs['target_signal'] = signal
                     nth_step_grp.attrs['hp_measured_signal'] = signal_measured.iloc[-1, :].values
                     nth_step_grp.attrs['time_all_images_were_taken'] = time_all_images_were_taken
+                    # TODO maybe also add Senis field if availale
                     if only_save_average_of_images:
                         image_data = np.mean(image_data, axis=2)
                     nth_step_grp.create_dataset('image_data', data=image_data)
-                    data_callback(current_signal_stabilized_time,
-                                  signal_measured.iloc[-1, :].values,
-                                  image_data)
+                    data_callback(current_signal_stabilized_time, signal_measured.iloc[-1, :].values, image_data)
                     time_all_data_saved_to_hdf = hexapole.get_data(start_time=-3, end_time=-1).index[-1]
                     nth_step_grp.attrs['time_all_data_saved_to_hdf'] = time_all_data_saved_to_hdf
                     last_signal_end_time = current_signal_stabilized_time
@@ -176,7 +176,7 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                 error_in_volts = hp.calibration.data2inst(signal_measured - signal_wanted).values
                 correction = np.zeros(error_in_volts.shape)
                 correction -= Kp * error_in_volts
-                # integral += error   # NOTE used for ID PID
+                # integral += error                # NOTE for not used ID parts in PID
                 # correction += Ki * integral
                 # derivative = error - previous_error
                 # correction += Kd * derivative

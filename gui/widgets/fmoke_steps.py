@@ -151,6 +151,7 @@ class ApplySteps(QWidget):
         expprms['take_reference_image'] = self.params.child("Running the experiment", "Take reference image before applying fields").value()
         expprms['notes_saved_to_hdf'] = self.params.child("NOTES", 'saved to HDF in "info"').value()
         expprms['measure_field_with_sensor'] = self.params.child("Running the experiment", "PID tuning", "Measure field with").value()
+        expprms['pid_type_to_use'] = self.params.child("Running the experiment", "PID tuning", "PID type to use").value()
         return expprms
 
     def update_plot_data(self, t, fields, image):
@@ -220,6 +221,7 @@ params_dict = [
                 "type": "group",
                 "expanded": False,
                 "children": [
+                    {"name": "PID type to use", "type": "list", "limits": ["dumb", "iteratively"], "value": "iteratively"},
                     {"name": "Measure field with", "type": "list", "limits": ["HallProbe", "Senis"], "value": "HallProbe"},
                     {"name": "Kp", "type": "float", "value": 0.5, "step": 0.1},
                     {"name": "Number points for tuning", "type": "int", "value": 1000},

@@ -42,7 +42,11 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
     experiment_parameters['exposure_time_ms_hamamatsu'] = camera_hamamatsu.exposure_time_ms
 
     # Experiment specific parameters
-    apply_pid_iteratively = False
+    pid_type_to_use = experiment_parameters['pid_type_to_use']
+    if pid_type_to_use == 'iteratively':
+        apply_pid_iteratively = True
+    else:
+        apply_pid_iteratively = False
     take_reference_image = experiment_parameters['take_reference_image']
     degauss = experiment_parameters['degauss']
     nb_loops = experiment_parameters['nb_loops']

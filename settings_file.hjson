@@ -114,9 +114,9 @@
 			"port_type": "AO",
 			"controller": "NIcard1",
 			"ports": {
-	            "Dev2/ao0": "magnet_A",
-	            "Dev2/ao2": "magnet_B",
-	            "Dev2/ao4": "magnet_C"
+	            "Dev2/ao0": "current_magnet_A",
+	            "Dev2/ao2": "current_magnet_B",
+	            "Dev2/ao4": "current_magnet_C"
 			},
 			/* TODO Used during calibration, remove later
 			"calibration": {
@@ -138,9 +138,9 @@
 			"port_type": "AI",
 			"controller": "NIcard1",
 			"ports": {
-	            "Dev1/ai16": "x",
-	            "Dev1/ai17": "y",
-	            "Dev1/ai18": "z"
+	            "Dev1/ai16": "field_x",
+	            "Dev1/ai17": "field_y",
+	            "Dev1/ai18": "field_z"
 			},
 			"calibration": {
 				"type": "SENISSampleCalib",

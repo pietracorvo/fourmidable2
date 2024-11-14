@@ -9,7 +9,7 @@ class CameraControllerHamamatsu:
 
         try:
             self.camera = DCAM.DCAMCamera()
-            self.camera.set_attribute_value("EXPOSURE TIME", 0.1)
+            self.camera.set_attribute_value("EXPOSURE TIME", 0.1)   # TODO seems not to work
         except:
             print('Unable to open camera!')
 

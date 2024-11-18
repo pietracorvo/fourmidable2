@@ -164,7 +164,6 @@ def take_steps(moke, signals, stop_event, saving_loc, data_callback, experiment_
                     nth_step_grp.attrs['target_signal'] = signal
                     nth_step_grp.attrs['hp_measured_signal'] = signal_measured.iloc[-1, :].values
                     nth_step_grp.attrs['time_all_images_were_taken'] = time_all_images_were_taken
-                    # TODO maybe also add Senis field if availale
                     if only_save_average_of_images:
                         image_data = np.mean(image_data, axis=2)
                     nth_step_grp.create_dataset('image_data', data=image_data)

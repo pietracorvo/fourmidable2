@@ -6,9 +6,17 @@ __pycache__/
 
 # Fourmidable specific
 error.log
-# NOTE these two are generated wehn running and have been checked in on other places, I dont knwo why
-#lextab.py
-#yacctab.py
+LoopTaking_*
+gui/gui_settings.hjson
+
+# NOTE  these two are generated when running pycparser (settings generated bz python when parsing C code)
+#	they have been checked in on other places, they should be checked out at some point
+**/lextab.py
+**/yacctab.py
+*/lextab.py
+*/yacctab.py
+lextab.py
+yacctab.py
 
 # just for the moment ignore the documentation
 mokepy_docs

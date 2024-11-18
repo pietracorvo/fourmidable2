@@ -232,7 +232,7 @@ def magnet_loop_tuning(moke, signal, period, tune_start, stop_event, parameters=
         # get the output signal
         correction = np.zeros(error.shape)
         if Kp != 0:
-            correction += Kp * error
+            correction -= Kp * error
         if Ki != 0:
             integral += error
             correction += Ki * integral

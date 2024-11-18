@@ -17,7 +17,8 @@ from PyQt5.QtWidgets import *
 import display.instrument_plotting as instrument_plotting
 from gui.widgets import moke_docker, movement, experiment_selection, skm_window, \
     loop_widget, stage_properties, find_centre, eucentric_protocol, move_buttons, apply_field, \
-    apply_custom_field, find_max_signal, laser_button, hp_calibration
+    apply_custom_field, find_max_signal, laser_button, hp_calibration, \
+    fmoke_steps, microscope_steps, microscopy_analysis, microscope_imaging, camera_quantalux_settings, camera_hamamatsu_settings
 from control.instruments import NIinst
 from control.instruments.moke import Moke
 from gui.widgets.canvas import DynamicInstrumentPlot
@@ -59,11 +60,16 @@ class ApplicationWindow(QMainWindow):
         # try setting the data folder, fallback to default
         try:
             self.data_folder = self.settings_data["data_folder"]
-        except KeyError:
-            self.data_folder = os.path.expanduser('~\\Documents\\3DMOKE')
+        except Exception as e:
+            print(f'Unable to get last data folder {self.data_folder}, default to {os.getcwd()}')
+            self.data_folder = os.getcwd()
         # check that the data folder exists. Otherwise, create it
         if not os.path.isdir(self.data_folder):
-            os.mkdir(self.data_folder)
+            try:
+                os.mkdir(self.data_folder)
+            except Exception:
+                print(f'Unable to create data folder {self.data_folder}, default to {os.getcwd()}')
+                self.data_folder = os.getcwd()
 
         # set toolbars and their actions
         self.file_menu = QMenu('&File', self)
@@ -81,19 +87,15 @@ class ApplicationWindow(QMainWindow):
         self.available_docks = {key: False for key, value in self.moke.instruments.items(
         ) if isinstance(value, NIinst)}
         self.available_docks.update({
-            #"wollaston1_composite": True,
-            #"wollaston2_composite": False,
-            #"wollaston1_fft": False,
-            #"wollaston2_fft": False,
-            #"camera1": True,
-            #"camera2": True,
+            "quanta_camera": False,
+            "hamamatsu_camera": False,
             "3D_fields": False,
             "console": False,
             "hallprobe": True,
             "temperature": False,
-            "hexapole": True,
-            #"v_measurement": True
+            "hexapole": True
         })
+
         # try loading docks setup from the settings, fall back to default it it fails
         try:
             if "docks" in self.settings_data and self.available_docks.keys() == self.settings_data["docks"].keys():
@@ -104,6 +106,7 @@ class ApplicationWindow(QMainWindow):
         # add the dock actions in the view toolbar
         self.view_menu_actions = dict()
         for k, is_open in self.available_docks.items():
+            # print(k, is_open)
             action = QAction(k, self, checkable=True)
             action.setChecked(is_open)
             action.triggered.connect(partial(self.toggle_view, k))
@@ -113,45 +116,65 @@ class ApplicationWindow(QMainWindow):
         # add menu containing experiments
         self.experiments_menu = QMenu('&Experiments', self)
         self.menuBar().addSeparator()
+        # Create Menu option called Experiments
         self.menuBar().addMenu(self.experiments_menu)
 
-        self.experiments_menu.addAction('&SKM', self.start_skm)
-        self.skm_window = None
-
-        self.experiments_menu.addAction('&Loop', self.start_loop)
-        self.loop_window = None
-
-        self.experiments_menu.addAction(
-            "&Find Woll Max Signal", self.find_max_signal)
-        self.find_max_signal_window = None
-
+        # Add "Constant Field Option"
         self.experiments_menu.addAction(
             '&Apply Constant Field', self.start_apply_field)
         self.apply_field_window = None
 
+        # Add "Constant Field Option"
+        # TODO: Revisit PID and Feedback
         self.experiments_menu.addAction(
             '&Apply Custom Field', self.start_apply_custom_field)
         self.apply_custom_field_window = None
 
+        # Add Fourier Moke Experiment
+        self.experiments_menu.addAction(
+            '&Hysteresis Loops - Fourier Moke', self.start_fmoke_steps)
+        self.fmoke_steps_window = None
+
+        # Add Kerr Microscopy Measurement
+        self.experiments_menu.addAction(
+            '&Hysteresis Loops - Kerr Microscopy', self.start_microscope_steps)
+        self.microscope_steps_window = None
+
+        # Add Static Kerr Microscopy Imaging Measurement
+        self.experiments_menu.addAction(
+            '&Kerr Microscopy Imaging', self.start_microscope_imaging)
+        self.microscope_imaging_window = None
+
+        # Add analysis menu
+        self.analysis_menu = QMenu('&Analysis', self)
+        self.menuBar().addSeparator()
+        # Create Menu option called Experiments
+        self.menuBar().addMenu(self.analysis_menu)
+
+        self.analysis_menu.addAction(
+            '&MOKE Microscopy', self.start_microscopy_analysis)
+        self.microscopy_analysis_window = None
+
+
         # add the calibration menu
-        self.calibration_menu = QMenu('&Calibration', self)
+        self.calibration_menu = QMenu('&Calibration - NOT WORKING legacy code from Luka', self)
         self.menuBar().addSeparator()
         self.menuBar().addMenu(self.calibration_menu)
 
         self.calibration_menu.addAction(
-            '&Hallprobe calibration', self.hallprobe_calibration)
+            '&Hallprobe calibration - NOT WORKING', self.hallprobe_calibration)
         self.hallprobe_calibration_window = None
 
         self.calibration_menu.addAction(
-            '&Stage properties', self.stage_properties)
+            '&Stage properties - NOT WORKING', self.stage_properties)
         self.stage_properties_window = None
 
         self.calibration_menu.addAction(
-            '&Find centre', self.find_centre)
+            '&Find centre - NOT WORKING', self.find_centre)
         self.find_centre_window = None
 
         self.calibration_menu.addAction(
-            '&Eucentric protocol', self.start_eucentric_protocol)
+            '&Eucentric protocol - NOT WORKING', self.start_eucentric_protocol)
         self.eucentric_protocol_window = None
 
         self.help_menu = QMenu('&Help', self)
@@ -167,6 +190,15 @@ class ApplicationWindow(QMainWindow):
                                                    value])
         self.moke_docker.sigDockClosed.connect(self.dock_closed_event)
         self.moke_docker.setMinimumSize(200, 200)
+
+        # button to open camera settings
+        self.camera_settings_window = None
+        self.button_open_camera_settings = QPushButton('Open Quanta settings')
+        self.button_open_camera_settings.clicked.connect(self.open_camera_settings)
+
+        self.cameraham_settings_window = None
+        self.button_open_cameraham_settings = QPushButton('Open Hamamatsu settings')
+        self.button_open_cameraham_settings.clicked.connect(self.open_camerahamamatsu_settings)
 
         # create movement control widget
         stage = moke.instruments['stage']
@@ -193,6 +225,8 @@ class ApplicationWindow(QMainWindow):
 
         vlayout = QVBoxLayout()
         #vlayout.addWidget(self.laser_button)
+        vlayout.addWidget(self.button_open_camera_settings)
+        vlayout.addWidget(self.button_open_cameraham_settings)
         vlayout.addWidget(self.movement_control)
         vlayout.addWidget(self.move_buttons)
 
@@ -208,14 +242,7 @@ class ApplicationWindow(QMainWindow):
 
         self.showMaximized()
 
-    def start_skm(self):
-        self.skm_window = skm_window.SkmWidget(self.moke)
-        self.skm_window.show()
 
-    def start_loop(self):
-        self.loop_window = loop_widget.LoopWidget(
-            self.moke, data_folder=self.data_folder)
-        self.loop_window.show()
 
     def start_apply_field(self):
         self.apply_field_window = apply_field.ApplyField(self.moke)
@@ -225,6 +252,34 @@ class ApplicationWindow(QMainWindow):
         self.apply_custom_field_window = apply_custom_field.ApplyCustomField(
             self.moke)
         self.apply_custom_field_window.show()
+
+    def start_fmoke_steps(self):
+        self.fmoke_steps_window = fmoke_steps.ApplySteps(
+            self.moke, data_folder=self.data_folder)
+        self.fmoke_steps_window.show()
+
+    def start_microscopy_analysis(self):
+        self.microscopy_analysis_window = microscopy_analysis.analysis_start()
+        self.microscopy_analysis_window.show()
+
+    def start_microscope_steps(self):
+        self.microscope_steps_window = microscope_steps.ApplySteps(
+            self.moke, data_folder=self.data_folder)
+        self.microscope_steps_window.show()
+
+    def start_microscope_imaging(self):
+        # Give self as an argument to be used inside Imaging Widget
+        self.microscope_imaging_window = microscope_imaging.ImagingWidget(
+            self, data_folder=self.data_folder)
+        self.microscope_imaging_window.show()
+
+    def open_camera_settings(self):
+        self.camera_settings_window = camera_quantalux_settings.CameraQuantaluxSettings(self.moke)
+        self.camera_settings_window.show()
+
+    def open_camerahamamatsu_settings(self):
+        self.cameraham_settings_window = camera_hamamatsu_settings.CameraHamamatsuSettings(self.moke)
+        self.cameraham_settings_window.show()
 
     def stage_properties(self):
         self.stage_properties_window = stage_properties.StageProperties(
@@ -277,10 +332,10 @@ class ApplicationWindow(QMainWindow):
 
     def set_data_folder(self):
         """Allows the user to set the data directory"""
-        print('This does nothing at the moment. Contact Luka if you want it implemented')
-        # folder = str(QFileDialog.getExistingDirectory(
-        #     self, "Select Directory"))
-        # print(folder)
+        #print('This does nothing at the moment. Contact Luka if you want it implemented')
+        folder = str(QFileDialog.getExistingDirectory(
+            self, "Select Directory"))
+        self.data_folder = folder
 
     def find_max_signal(self):
         """Moves the nanocube around to find the maximum signal"""
@@ -292,6 +347,7 @@ class ApplicationWindow(QMainWindow):
         try:
             print('Saving GUI settings')
             self.settings_data["docks"] = self.available_docks
+            self.settings_data["data_folder"] = self.data_folder
             with open(self.settings_file_path, 'w') as file:
                 hjson.dump(self.settings_data, file)
         except:
@@ -313,6 +369,18 @@ class ApplicationWindow(QMainWindow):
         except:
             pass
         try:
+            self.fmoke_steps_window.close()
+        except:
+            pass
+        try:
+            self.camera_settings_window.close()
+        except:
+            pass
+        try:
+            self.cameraham_settings_window.close()
+        except:
+            pass
+        try:
             self.moke_docker.close()
         except:
             pass
@@ -324,7 +392,7 @@ class ApplicationWindow(QMainWindow):
 
     def about(self):
         QMessageBox.about(self, "About",
-                          """This program is written and maintained by Luka Skoric. For any questions and problems, please contact me on ls604@cam.ac.uk"""
+                          """This program has been written by Luka Skoric (ls604@cam.ac.uk) and adapted by Alexander Rabensteiner (pietracorvo@hotmail.com) and Miguel A. Cascales Sandoval. For any questions and problems, please contact on of them."""
                           )
 
 

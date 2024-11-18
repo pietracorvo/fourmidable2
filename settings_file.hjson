@@ -73,6 +73,16 @@
 					]
 				}
 			}
+		},
+		{
+			"type": "CameraControllerQuantalux",
+			"name": "CameraControllerQuantalux1",
+			"parameters": {}
+		},
+		{
+			"type": "CameraControllerHamamatsu",
+			"name": "CameraControllerHamamatsu1",
+			"parameters": {}
 		}
 	],
 	"instruments": {
@@ -81,9 +91,9 @@
 			"port_type": "AI",
 			"controller": "NIcard1",
 			"ports": {
-				"Dev1/ai0": "hallprobe_A",
-	            "Dev1/ai2": "hallprobe_B",
-	            "Dev1/ai4": "hallprobe_C"
+				"Dev1/ai0": "field_X",
+	            "Dev1/ai2": "field_Y",
+	            "Dev1/ai4": "field_Z"
 			},
             /* TODO Used during calibration, remove later
 			"calibration": {
@@ -93,9 +103,9 @@
 				"type": "HPSampleCalib",
 				"parameters": {
 					# volts in HPs to mT in table reference frame
-					"scale": [[12.06081707068405, -16.43105190302377, 4.558304908217234], [-14.03369938998217, -4.681902746619606, 17.74730301953106], [12.228775790445898, 11.619109116303783, 11.43677500099918]],
+					"scale":  [[-19.38802777, 10.42844706, 9.00235722], [0.36219187, 16.58112135, -17.05363111], [14.68226182, 14.51667973, 12.87264212]],
                     # angle between the senis-FOR (already rotated by its calibration) and sample-FOR (rotate negative for clockwise around table-FOR z-direction)
-					"angle_senis2table": -135
+					"xy_rotation_angle": 0
 				}
 			}
 		},
@@ -104,9 +114,9 @@
 			"port_type": "AO",
 			"controller": "NIcard1",
 			"ports": {
-	            "Dev2/ao0": "magnet_A",
-	            "Dev2/ao2": "magnet_B",
-	            "Dev2/ao4": "magnet_C"
+	            "Dev2/ao0": "current_magnet_A",
+	            "Dev2/ao2": "current_magnet_B",
+	            "Dev2/ao4": "current_magnet_C"
 			},
 			/* TODO Used during calibration, remove later
 			"calibration": {
@@ -128,16 +138,17 @@
 			"port_type": "AI",
 			"controller": "NIcard1",
 			"ports": {
-	            "Dev1/ai16": "x",
-	            "Dev1/ai17": "y",
-	            "Dev1/ai18": "z"
+	            "Dev1/ai16": "field_x",
+	            "Dev1/ai17": "field_y",
+	            "Dev1/ai18": "field_z"
 			},
 			"calibration": {
-				"type": "NIoffsetScale",
+				"type": "SENISSampleCalib",
 				"parameters": {
 					# volts to mT
 					'scale': [[-20, 0, 0], [0, 0, 20], [0, 20, 0]],   # flip hall FOR xyz->-xzy like table FOR
 					'offset': [0, 0, 0]
+					'xy_rotation_angle': 135
 				}
 			}
 		},
@@ -162,9 +173,17 @@
                     'scale': 0.1,
                     # 5Volts is middle position of nanocube
                     'offset': [5, 5, 5]
+
                 }
             }
-            # TODO currently axes labels hard coded in NanoCube class
+		},
+		"quanta_camera": {
+			"type": "CameraQuantalux",
+			"controller": "CameraControllerQuantalux1"
+		},
+		"hamamatsu_camera": {
+			"type": "CameraHamamatsu",
+			"controller": "CameraControllerHamamatsu1"
 		},
 		# NOTE only needed for experiments\calibration\RL_circuit_testing.py
 		"v_measurement": {
@@ -212,4 +231,3 @@
 		}
 	}
 }
-

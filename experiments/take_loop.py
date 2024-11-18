@@ -182,14 +182,17 @@ def start_signal(moke, signal, period, tune_loop=False):
 
 def get_save_handle(saving_loc):
     # check if the saving_loc is None, path or group, proceed accordingly
+    default_filename = 'LoopTaking_' + \
+               time.strftime("%Y%m%d-%H%M%S") + '.h5'
     if saving_loc is None:
-        filename = 'LoopTaking_' + \
-            time.strftime("%Y%m%d-%H%M%S") + '.h5'
-        filepath = os.path.join(os.getcwd(), filename)
+        filepath = os.path.join(os.getcwd(), default_filename)
         print('Saving to ', filepath)
         f = h5py.File(filepath, 'a')
     elif isinstance(saving_loc, str):
-        filepath = saving_loc
+        if os.path.isdir(saving_loc):
+            filepath = os.path.join(os.path.abspath(saving_loc), default_filename)
+        else:
+            filepath = saving_loc
         print('Saving to ', filepath)
         f = h5py.File(filepath, 'a')
     else:
@@ -228,6 +231,23 @@ def save_instruments(moke, inst_grp, saving_instruments, start_time, end_time):
     for inst in saving_instruments:
         moke.instruments[inst].save(inst_grp, start_time=start_time,
                                     end_time=end_time)
+
+def append_save_instruments(moke, grp, saving_instruments, start_time, end_time):
+    """
+    Same like save_instruments, but appends data if group already present.
+    """
+    for inst in saving_instruments:
+        try:
+            save_instruments(moke, grp, [inst], start_time, end_time)
+        except ValueError:
+            # append if group already present
+            data = moke.instruments[inst].get_data(start_time=start_time, end_time=end_time)
+            data = data.reset_index()
+            data = data.values
+            old_shape = grp[inst]['data'].shape
+            new_shape = (old_shape[0] + data.shape[0], old_shape[1])
+            grp[inst]['data'].resize(new_shape)
+            grp[inst]['data'][old_shape[0]:,:] = data
 
 def send_data_callback(moke, data_callback, saving_instruments, start_time, end_time):
     inst_data = dict()

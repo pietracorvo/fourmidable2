@@ -45,6 +45,7 @@ class MokeDocker(QWidget):
         self.ni_instruments = [
             key for key, value in self.moke.instruments.items() if isinstance(value, NIinst)]
         # list of NI instruments to add as docks:
+
         if dock_list is None:
             self.dock_names = [
                 "hallprobe",
@@ -53,6 +54,7 @@ class MokeDocker(QWidget):
                 "wollaston1_composite",
                 "camera1",
                 "camera2",
+                "quanta_camera",
                 # "3D_fields"
                 "console"
             ]
@@ -89,48 +91,13 @@ class MokeDocker(QWidget):
                 self.dock_dict.update({name: d})
                 self.dockarea.addDock(d)
 
-            elif len(name.split('_')) == 2 and name.split('_')[1] == "composite":
-                layout = pg.GraphicsLayoutWidget()
-                plt = dict()
-                for key in ["difference", "average", "det1", "det2"]:
-                    plt[key] = layout.addPlot(title=key)
-                    layout.nextRow()
-                self.dynamic_plots[name] = WollastonPlotting(
-                    self.moke.instruments[name.split('_')[0]], plt=plt)
-                d = Dock(name, widget=layout, closable=True)
-                d.sigClosed.connect(partial(self.dock_closed, name))
-                self.dock_dict.update({name: d})
-                self.dockarea.addDock(d, 'right')
 
-            elif len(name.split('_')) >= 2 and name.split('_')[-1] == "fft":
-                layout = pg.GraphicsLayoutWidget()
-                inst_name = '_'.join(name.split('_')[:-1])
-                plt = dict()
-                for key in self.moke.instruments[inst_name].ports.values():
-                    plt[key] = layout.addPlot(title=key)
-                    layout.nextRow()
-                # if the instrument is wollaston, add diff and sum
-                if inst_name[:-1] == 'wollaston':
-                    for key in ['diff', 'sum']:
-                        plt[key] = layout.addPlot(title=key)
-                        layout.nextRow()
-                self.dynamic_plots[name] = FFTplotting(
-                    self.moke.instruments[inst_name], plt=plt)
-                d = Dock(name, widget=layout, closable=True)
-                d.sigClosed.connect(partial(self.dock_closed, name))
-                self.dock_dict.update({name: d})
-                self.dockarea.addDock(d, 'right')
-
+            # Create Live View of Camera
             elif "camera" in name:
-                view = pg.GraphicsView()
-                view.useOpenGL()
-                viewbox = pg.ViewBox()
-                viewbox.setAspectLocked(True)
-                plt = pg.ImageItem()
-                viewbox.addItem(plt)
-                view.setCentralItem(viewbox)
+                view = pg.GraphicsLayoutWidget()
+                if 'hama' in name: self.moke.instruments[name].start_acquisition()
                 self.dynamic_plots[name] = CameraPlotting(
-                    self.moke.instruments[name], plt=plt, view=viewbox)
+                    self.moke.instruments[name], view=view)
                 d = Dock(name, widget=view, closable=True)
                 d.sigClosed.connect(partial(self.dock_closed, name))
                 self.dock_dict.update({name: d})
@@ -168,7 +135,8 @@ class MokeDocker(QWidget):
             print(name, ' not one of the docks')
 
     def start_timer(self):
-        self.timer.start(int(1000.0 / self.framerate))
+        # self.timer.start(int(1000.0 / self.framerate))
+        self.timer.start(int(50))
 
     def update_plot(self):
         for p in self.dynamic_plots.values():

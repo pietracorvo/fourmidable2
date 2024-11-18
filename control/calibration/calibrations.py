@@ -114,6 +114,55 @@ class NIoffsetScale(InstrumentCalibration):
                                   index=data.index)
         return data_calib
 
+class SENISSampleCalib(InstrumentCalibration):
+    """Offset and scales the data by the given parameters. Accepts both numbers and matrices/vectors for offset"""
+
+    def __init__(self, parameters):
+
+        InstrumentCalibration.__init__(self, parameters)
+        if 'offset' in self.parameters:
+            self.offset = np.array(self.parameters['offset'])
+        else:
+            self.offset = np.array([0] * len(self.parameters['scale']))
+        self.scale = np.array(self.parameters['scale'])
+
+        if 'xy_rotation_angle' in parameters:
+            self.xy_rotation_angle = float(self.parameters['xy_rotation_angle'])
+        else:
+            self.xy_rotation_angle = 0
+
+        if self.scale.ndim == 0:
+            self.scale = self.scale[None, None]
+
+    def get_xyrotation_matrix(self):
+        """Get matrix that rotates the FOR of the senis into table FOR"""
+        angle = self.xy_rotation_angle * np.pi/180
+        c, s = np.cos(angle), np.sin(angle)
+        R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+        return R
+
+    def data2inst(self, data):
+        if data.shape[0] == 0:
+            return data
+        # get the matrix to rotate senis FOR to table FOR
+        R = self.get_xyrotation_matrix()
+        data_calib = pd.DataFrame((np.array(data).dot(np.linalg.inv(R)) - self.offset).dot(np.linalg.inv(np.transpose(self.scale))),
+                                  columns=data.columns,
+                                  index=data.index)
+        return data_calib
+
+    def inst2data(self, data):
+        if data.shape[0] == 0:
+            return data
+        # get the matrix to rotate senis FOR to table FOR
+        R = self.get_xyrotation_matrix()
+        # combine the transformations
+        M = np.transpose(self.scale).dot(R)
+        off = self.offset.dot(R)
+        data_calib = pd.DataFrame(np.array(data).dot(M) + off, columns=data.columns,
+                                  index=data.index)
+        return data_calib
+
 
 class StageSampleRefCalib(InstrumentCalibration):
     def __init__(self, parameters, subinstruments):
@@ -279,17 +328,17 @@ class HPSampleCalib(InstrumentCalibration):
             self.offset = np.array([0] * len(self.parameters['scale']))
         self.scale = np.array(self.parameters['scale'])
 
-        if 'angle_senis2table' in parameters:
-            self.angle_senis2table = float(self.parameters['angle_senis2table'])
+        if 'xy_rotation_angle' in parameters:
+            self.xy_rotation_angle = float(self.parameters['xy_rotation_angle'])
         else:
-            self.angle_senis2table = 0
+            self.xy_rotation_angle = 0
 
         if self.scale.ndim == 0:
             self.scale = self.scale[None, None]
 
-    def get_senis2table_matrix(self):
+    def get_xyrotation_matrix(self):
         """Get matrix that rotates the FOR of the senis into table FOR"""
-        angle = self.angle_senis2table
+        angle = self.xy_rotation_angle * np.pi/180
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
         return R
@@ -298,7 +347,7 @@ class HPSampleCalib(InstrumentCalibration):
         if data.shape[0] == 0:
             return data
         # get the matrix to rotate senis FOR to table FOR
-        R = self.get_senis2table_matrix()
+        R = self.get_xyrotation_matrix()
         data_calib = pd.DataFrame((np.array(data).dot(np.linalg.inv(R)) - self.offset).dot(np.linalg.inv(np.transpose(self.scale))),
                                   columns=data.columns,
                                   index=data.index)
@@ -308,7 +357,7 @@ class HPSampleCalib(InstrumentCalibration):
         if data.shape[0] == 0:
             return data
         # get the matrix to rotate senis FOR to table FOR
-        R = self.get_senis2table_matrix()
+        R = self.get_xyrotation_matrix()
         # combine the transformations
         M = np.transpose(self.scale).dot(R)
         off = self.offset.dot(R)
